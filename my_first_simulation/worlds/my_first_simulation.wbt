@@ -4,7 +4,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation -0.564922266908356 0.8048727417847898 0.18177651631318928 0.7255882395273912
-  position 1.2757642013679906 1.2277544600031545 2.1476697823536175
+  position 1.1659391036039382 1.1387836286812794 1.9842089704707022
 }
 TexturedBackground {
 }
@@ -30,5 +30,5 @@ WoodenBox {
 }
 E-puck {
   translation 0.08698499999999999 0 0.226039
-  controller "e-puck_go_forward"
+  controller "epuck_controller"
 }

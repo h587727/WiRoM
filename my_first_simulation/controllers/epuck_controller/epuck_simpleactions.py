@@ -6,27 +6,26 @@ robot = Robot()
 timestep = int(robot.getBasicTimeStep())
 
 def go_forward(target):
-    effective = init_motors_sensors(6.28)
-    target = effective + target
+    effective_postition = init_motors_sensors(6.28)
+    target = effective_postition + target
 
-    while effective < target:
+    while effective_postition < target:
         if robot.step(timestep) == -1:
             break
-        effective = (left_sensor.getValue() + right_sensor.getValue()) / 2
+        effective_postition = (left_sensor.getValue() + right_sensor.getValue()) / 2
 
     stop_motors_sensors()
 
 def go_backward(target):
-    effective = init_motors_sensors(-6.28)
-    target = effective - target
+    effective_postition = init_motors_sensors(-6.28)
+    target = effective_postition - target
 
-    while effective > target:
+    while effective_postition > target:
         if robot.step(timestep) == -1:
             break
-        effective = (left_sensor.getValue() + right_sensor.getValue()) / 2
+        effective_postition = (left_sensor.getValue() + right_sensor.getValue()) / 2
 
     stop_motors_sensors()
-    # Enter here exit cleanup code.
 
 def init_motors_sensors(velocity):
     global left_motor 
@@ -46,11 +45,11 @@ def init_motors_sensors(velocity):
     left_sensor.enable(timestep)
     right_sensor.enable(timestep)
 
-    effective = (left_sensor.getValue() + right_sensor.getValue()) / 2
-    if math.isnan(effective):
-        effective = 0
+    effective_postition = (left_sensor.getValue() + right_sensor.getValue()) / 2
+    if math.isnan(effective_postition):
+        effective_postition = 0
 
-    return effective
+    return effective_postition
 
 def stop_motors_sensors():
     left_motor.setVelocity(0)
