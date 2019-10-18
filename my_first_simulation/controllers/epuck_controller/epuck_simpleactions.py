@@ -6,24 +6,24 @@ robot = Robot()
 timestep = int(robot.getBasicTimeStep())
 
 def go_forward(target, velocity):
-    init_motors_sensors(velocity)
+    _init_motors_sensors(velocity)
     target = effective_position + target
-    synchronize_motor(effective_position, target)
-    stop_motors_sensors()
+    _synchronize_motor(effective_position, target)
+    _stop_motors_sensors()
 
 def go_backward(target, velocity):
-    init_motors_sensors(-velocity)
+    _init_motors_sensors(-velocity)
     target = effective_position - target
-    synchronize_motor(effective_position, target)
-    stop_motors_sensors()
+    _synchronize_motor(effective_position, target)
+    _stop_motors_sensors()
 
-def synchronize_motor(effective_position, target):
+def _synchronize_motor(effective_position, target):
     while robot.step(timestep) != -1:
         if math.floor(effective_position) == math.floor(target):
             break
         effective_position = (left_sensor.getValue() + right_sensor.getValue()) / 2
 
-def init_motors_sensors(velocity):
+def _init_motors_sensors(velocity):
     global left_motor 
     global right_motor
     global left_sensor
@@ -49,7 +49,7 @@ def init_motors_sensors(velocity):
         effective_position = 0
 
 
-def stop_motors_sensors():
+def _stop_motors_sensors():
     left_motor.setVelocity(0)
     right_motor.setVelocity(0)
     left_sensor.disable()
