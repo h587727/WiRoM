@@ -9,7 +9,17 @@
       name="description"
       content="Web site created using create-react-app"
     />
-    <link rel="apple-touch-icon" href="logo192.png" />
+    <link rel='stylesheet' href='https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css'/>
+    <link type="text/css" rel="stylesheet" href='https://www.cyberbotics.com/wwi/R2019b/wwi.css' />
+    <link type="text/css" rel="stylesheet" href='style.css' />
+    <script src='https://code.jquery.com/jquery-3.1.1.min.js' integrity='sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=' crossorigin='anonymous'></script>
+    <script src='https://code.jquery.com/ui/1.12.1/jquery-ui.min.js' integrity='sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=' crossorigin='anonymous'></script>
+    <script src='https://www.cyberbotics.com/jquery-ui-layout/1.4.4/jquery.layout.js'></script>
+    <script src='https://www.cyberbotics.com/jquery-dialogextend/2.0.4/jquery.dialogextend.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/ace/1.2.6/min/ace.js'></script>
+    <script src="https://www.cyberbotics.com/wwi/R2019b/webots.min.js"></script>
+    <script src="setup_viewer.js"></script>
+    
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -39,5 +49,17 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <div>
+        <h1>Webots streaming viewer</h1>
+
+          Connect to:
+          <input id="IPInput" type="text" value="localhost" />
+          :
+          <input id="PortInput" type="text" value="1234" />
+          <input id="ConnectButton" type="button" value="Connect" onclick="connect()" />
+
+      </div>
+      <div id="playerDiv">
+    </div>
   </body>
 </html>

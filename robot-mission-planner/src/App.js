@@ -1,10 +1,12 @@
 import React, {Component} from 'react';
-
 class App extends Component {
+
   render () {
     return (
-      <ActionForm>
-      </ActionForm>  
+      <div>
+        <ActionForm>
+        </ActionForm>  
+      </div>
     );
   }
 }
@@ -38,22 +40,26 @@ class ActionForm extends Component {
 
   render(){
     return(
-      <form onSubmit={this.handleSubmit}>
-        <input 
-          type="text"
-          value={this.state.mission.robot}
-          onChange={this.handleRobotChange}
-        />
-        <input 
-          type="text"
-          value={this.state.mission.actions}
-          onChange={this.handleActionsChange(0)}
-        />
+      <div>
+        <h1>Select robot mission</h1>
 
-        <button type="submit">
-          Send mission
-        </button>
-      </form>
+        <form onSubmit={this.handleSubmit}>
+          <input 
+            type="text"
+            value={this.state.mission.robot}
+            onChange={this.handleRobotChange}
+          />
+          <input 
+            type="text"
+            value={this.state.mission.actions}
+            onChange={this.handleActionsChange(0)}
+          />
+
+          <button type="submit">
+            Send mission
+          </button>
+        </form>
+      </div>
     );
   }
 }

@@ -1,0 +1,9 @@
+#playerDiv {
+  padding: 0;
+  height: calc(100% - 200px);
+  width: 75%;
+}
+
+#webotsProgress {
+  visibility: hidden
+}
