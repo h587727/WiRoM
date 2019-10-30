@@ -1,0 +1,53 @@
+#VRML_SIM R2019b utf8
+WorldInfo {
+  basicTimeStep 8
+  defaultDamping Damping {
+    linear 0.5
+    angular 0.5
+  }
+}
+Viewpoint {
+  orientation -0.0031014469720316343 0.9998768826588325 0.015381825351207105 2.316855738520748
+  position 412.347974912898 0.12551303047382323 -404.7653631506068
+  follow "Mavic 2 PRO"
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+UnevenTerrain {
+  translation 0 -4 0
+  size 1000 5 1000
+  appearance SandyGround {
+    textureTransform TextureTransform {
+    }
+  }
+  textureScale 4 4
+}
+SolidBox {
+  translation 407.28 -0.54 -401.17
+  name "box(2)"
+  size 1 0.5 1
+  appearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "textures/metal.jpg"
+      ]
+    }
+    roughness 0.5
+    metalness 0
+  }
+}
+Mavic2Pro {
+  translation 407.361 -0.204817 -401.169
+  rotation -0.998772633307161 -0.03502639520279403 0.03501968868760604 1.57198174977931
+  controller "mavic2pro_controller"
+}
+Moose {
+  translation 407.383 -0.44 -398.093
+  rotation 0 1 0 -2.8797853071795863
+  controller "moose_controller"
+}
+OilBarrel {
+  translation 0 -0.5 0
+}

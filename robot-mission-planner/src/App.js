@@ -14,9 +14,21 @@ class App extends Component {
 class ActionForm extends Component {
   state = {
     mission: {
-      robot : "epuck",
-      actions : [
-          "go_forward(10, 6.28)"
+      robots : [
+        {
+          name : "mavic2pro",
+          language : "python",
+          actions : [
+            "takeoff(1.0)"
+          ]
+        },
+        {
+          name : "moose",
+          language : "python",
+          actions : [
+            "init_moose()"
+          ]
+        }
       ]
     }
   }
@@ -27,15 +39,18 @@ class ActionForm extends Component {
   }
 
   handleRobotChange = event => {
-    const mission = this.state.mission;
-    mission.robot = event.target.value;
-    this.setState(mission)
+    const robot = this.state.mission.robots;
+    robot.name = event.target.value;
+    this.setState(robot)
   }
 
   handleActionsChange = id => event => {
-    const mission = this.state.mission;
-    mission.actions[id] = event.target.value;
-    this.setState(mission)
+    const robot = this.state.mission.robots[id];
+    robot.actions = [];
+    event.target.value.split(',').forEach(e => {
+      robot.actions.push(e);
+    });
+    this.setState(robot)
   }
 
   render(){
@@ -46,13 +61,30 @@ class ActionForm extends Component {
         <form onSubmit={this.handleSubmit}>
           <input 
             type="text"
-            value={this.state.mission.robot}
+            value={this.state.mission.robots[0].name}
             onChange={this.handleRobotChange}
           />
+
+          <input
+            type="text"
+            value={this.state.mission.robots[0].actions}
+            onChange={this.handleActionsChange(0)}
+            style={{width: 200}}
+          />
+        </form>
+
+        <form onSubmit={this.handleSubmit}>
           <input 
             type="text"
-            value={this.state.mission.actions}
-            onChange={this.handleActionsChange(0)}
+            value={this.state.mission.robots[1].name}
+            onChange={this.handleRobotChange}
+          />
+
+          <input 
+            type="text"
+            value={this.state.mission.robots[1].actions}
+            onChange={this.handleActionsChange(1)}
+            style={{width: 200}}
           />
 
           <button type="submit">
