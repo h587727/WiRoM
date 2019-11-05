@@ -1,11 +1,10 @@
 import React, {Component} from 'react';
 class App extends Component {
-
   render () {
     return (
       <div>
         <ActionForm>
-        </ActionForm>  
+        </ActionForm>
       </div>
     );
   }

@@ -33,7 +33,6 @@ function init() {
 function connect() {
   var playerDiv = document.getElementById('playerDiv');
   view = new webots.View(playerDiv, mobileDevice);
-  view.broadcast = true;
   view.open('ws://' + ipInput.value + ':' + portInput.value);
   connectButton.value = 'Disconnect';
   connectButton.onclick = disconnect;
