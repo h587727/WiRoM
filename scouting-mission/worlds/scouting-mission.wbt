@@ -7,9 +7,9 @@ WorldInfo {
   }
 }
 Viewpoint {
-  orientation -0.0031014469720316343 0.9998768826588325 0.015381825351207105 2.316855738520748
-  position 412.347974912898 0.12551303047382323 -404.7653631506068
-  follow "Mavic 2 PRO"
+  orientation -0.03804053490251828 0.9957779100861693 0.08354203426270664 2.215984138393717
+  position 412.93373111930276 0.7537607009018834 -403.95503580647477
+  follow "moose"
 }
 TexturedBackground {
 }
@@ -47,7 +47,15 @@ Moose {
   translation 407.383 -0.44 -398.093
   rotation 0 1 0 -2.8797853071795863
   controller "moose_controller"
+  bodySlot [
+    Compass {
+      rotation 1 0 0 1.5708
+    }
+    GPS {
+      rotation 1 0 0 1.5708
+    }
+  ]
 }
 OilBarrel {
-  translation 0 -0.5 0
+  translation 298.54 -0.5 -348.42
 }
