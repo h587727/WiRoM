@@ -42,17 +42,21 @@ roll_disturbance = 0
 pitch_disturbance = 0
 yaw_disturbance = 0
 
+# variables to set drone functions
 recognise = False
-target_reached = False
 navigate = False
-location = []
+target_reached = False
+message_recipient = ''
+target_location = []
 
-# takeoff function which sets the target altitude as well as start the main loop
-def takeoff(target):
+# Initialize which sets the target altitude as well as start the main loop
+def init():
+    main = threading.Thread(target=mavic2pro_main)
+    main.start()
+
+def set_altitude(target):
     global target_altitude
     target_altitude = target
-    main = threading.Thread(target=drone_main)
-    main.start()
     time.sleep(5)
 
 def go_forward(duration):
@@ -98,30 +102,34 @@ def go_to_location(target):
     while navigate:
         time.sleep(1)
 
-def stop():
+def set_message_target(target):
+    global message_recipient
+    message_recipient = target
+
+def stop_movement():
     global pitch_disturbance
     global yaw_disturbance
     pitch_disturbance = 0
     yaw_disturbance = 0
 
-# utilize a global JSON file for sending information between robots
+# Utilize a global JSON file as a simple way of sending information between robots
 def send_location(rec_obj_pos):
     with open('../messages.json', 'r') as file:
         data = json.load(file)
     file.close()
 
     with open('../messages.json', 'w') as file:
-        data['moose']['location'] = [rec_obj_pos[0], rec_obj_pos[2]]
+        data[message_recipient]['location'] = [rec_obj_pos[0], rec_obj_pos[2]]
         json.dump(data, file)
     file.close()
 
+# Function that finds the angle and distance to a location and moves the vehicle accordingly
 def navigate_to_location():
     global navigate
 
     pos = gps.getValues()
     north = compass.getValues()
     front = [-north[0], north[1], north[2]]
-
     dir = [location[0] - pos[0], location[1] - pos[2]]
     distance = math.sqrt(dir[0] * dir[0] + dir[1] * dir[1])
 
@@ -138,11 +146,11 @@ def navigate_to_location():
     else:
         go_forward(0)
         
-    # stop vehicle and navigation when target has been reached 
+    # stop navigation and vehicle movements when target has been reached 
     if distance < 1:
         print('Reached target')
         navigate = False
-        stop()
+        stop_movement()
 
 def CLAMP(value, low, high):
     if value < low:
@@ -151,10 +159,37 @@ def CLAMP(value, low, high):
         return high
     return value
 
+def stabilize_and_control_movement():
+    roll = iu.getRollPitchYaw()[0] + math.pi/ 2.0
+    pitch = iu.getRollPitchYaw()[1]
+    roll_acceleration = gyro.getValues()[0] 
+    pitch_acceleration = gyro.getValues()[1]
+    altitude = gps.getValues()[1]
+
+    # Compute the roll, pitch, yaw and vertical inputs.
+    roll_input = k_roll_p * CLAMP(roll, -1.0, 1.0) + roll_acceleration + roll_disturbance
+    pitch_input = k_pitch_p * CLAMP(pitch, -1.0, 1.0) - pitch_acceleration + pitch_disturbance
+    yaw_input = yaw_disturbance
+    clamped_difference_altitude = CLAMP(target_altitude - altitude + k_vertical_offset, -1.0, 1.0)
+    vertical_input = k_vertical_p * pow(clamped_difference_altitude, 3.0)
+
+    # Actuate the motors taking into consideration all the computed inputs.
+    front_left_motor_input = k_vertical_thrust + vertical_input - roll_input - pitch_input + yaw_input
+    front_right_motor_input = k_vertical_thrust + vertical_input + roll_input - pitch_input - yaw_input
+    rear_left_motor_input = k_vertical_thrust + vertical_input - roll_input + pitch_input - yaw_input
+    rear_right_motor_input = k_vertical_thrust + vertical_input + roll_input + pitch_input + yaw_input
+
+    # Set the motor velocities required for stabilization and movement
+    front_left_motor.setVelocity(front_left_motor_input)
+    front_right_motor.setVelocity(-front_right_motor_input)
+    rear_left_motor.setVelocity(-rear_left_motor_input)
+    rear_right_motor.setVelocity(rear_right_motor_input)
+
+
 # main loop, starts the drone and keeps it stable at target altitude, and reading the global variables for target directions
-def drone_main():
-    global location
+def mavic2pro_main():
     global recognise
+
     for motor in motors:
         motor.setPosition(float('inf'))
 
@@ -162,36 +197,9 @@ def drone_main():
         if navigate:
             navigate_to_location()
         
-        roll = iu.getRollPitchYaw()[0] + math.pi/ 2.0
-        pitch = iu.getRollPitchYaw()[1]
-        roll_acceleration = gyro.getValues()[0] 
-        pitch_acceleration = gyro.getValues()[1]
-        altitude = gps.getValues()[1]
-
-        # Compute the roll, pitch, yaw and vertical inputs.
-        roll_input = k_roll_p * CLAMP(roll, -1.0, 1.0) + roll_acceleration + roll_disturbance
-        pitch_input = k_pitch_p * CLAMP(pitch, -1.0, 1.0) - pitch_acceleration + pitch_disturbance
-        yaw_input = yaw_disturbance
-        clamped_difference_altitude = CLAMP(target_altitude - altitude + k_vertical_offset, -1.0, 1.0)
-        vertical_input = k_vertical_p * pow(clamped_difference_altitude, 3.0)
-
-        # Actuate the motors taking into consideration all the computed inputs.
-        front_left_motor_input = k_vertical_thrust + vertical_input - roll_input - pitch_input + yaw_input
-        front_right_motor_input = k_vertical_thrust + vertical_input + roll_input - pitch_input - yaw_input
-        rear_left_motor_input = k_vertical_thrust + vertical_input - roll_input + pitch_input - yaw_input
-        rear_right_motor_input = k_vertical_thrust + vertical_input + roll_input + pitch_input + yaw_input
-
-        front_left_motor.setVelocity(front_left_motor_input)
-        front_right_motor.setVelocity(-front_right_motor_input)
-        rear_left_motor.setVelocity(-rear_left_motor_input)
-        rear_right_motor.setVelocity(rear_right_motor_input)
-
-        if recognise and camera.getRecognitionObjects():
+        stabilize_and_control_movement()
+        if recognise and message_recipient and camera.getRecognitionObjects():
             for rec_obj in camera.getRecognitionObjects():
-                #print(rec_obj.get_position())
-                #print(rec_obj.get_orientation())
-                #print(gps.getValues())
                 rec_obj_pos = [gps.getValues()[0] - rec_obj.get_position()[0], gps.getValues()[1] - rec_obj.get_position()[1], gps.getValues()[2] - rec_obj.get_position()[2]]
-                #print(rec_obj_pos)
                 send_location(rec_obj_pos)
                 recognise = False

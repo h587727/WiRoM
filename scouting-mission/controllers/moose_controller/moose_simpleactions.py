@@ -33,7 +33,7 @@ target_reached = False
 navigate = False
 location = []
 
-def init_moose():
+def init():
     main = threading.Thread(target=moose_main)
     main.start()
 
@@ -99,7 +99,7 @@ def receive_location_from_message():
             location = data['moose']['location']
             time.sleep(1)
         file.close()
-        
+
     # clear message    
     with open('../messages.json', 'w') as file:
         data['moose']['location'] = []
