@@ -1,14 +1,14 @@
 #VRML_SIM R2019b utf8
 WorldInfo {
-  basicTimeStep 8
+  basicTimeStep 16
   defaultDamping Damping {
     linear 0.5
     angular 0.5
   }
 }
 Viewpoint {
-  orientation -0.03804053490251828 0.9957779100861693 0.08354203426270664 2.215984138393717
-  position 412.93373111930276 0.7537607009018834 -403.95503580647477
+  orientation -0.01640792669571068 0.9963285113748447 0.08402545663746278 2.684218611684567
+  position 410.09024017850646 0.771517107908388 -405.61231074305454
   follow "moose"
 }
 TexturedBackground {
@@ -40,8 +40,27 @@ SolidBox {
 }
 Mavic2Pro {
   translation 407.361 -0.204817 -401.169
-  rotation -0.998772633307161 -0.03502639520279403 0.03501968868760604 1.57198174977931
+  rotation 0.06813326818388707 0.7086996690593406 0.702212672088566 -2.9074453071795863
   controller "mavic2pro_controller"
+  bodySlot [
+    Compass {
+      rotation 1 0 0 1.5708
+    }
+  ]
+  cameraSlot [
+    Camera {
+      rotation 1 0 0 -0.13090030610042527
+      rotationStep 0.261812
+      recognitionColors [
+        0 0 0
+      ]
+      width 400
+      height 240
+      recognition Recognition {
+        maxRange 30
+      }
+    }
+  ]
 }
 Moose {
   translation 407.383 -0.44 -398.093
@@ -57,5 +76,5 @@ Moose {
   ]
 }
 OilBarrel {
-  translation 298.54 -0.5 -348.42
+  translation 387.56 -0.5 -364.59
 }

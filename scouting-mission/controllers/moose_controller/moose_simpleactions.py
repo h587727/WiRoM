@@ -4,6 +4,7 @@ from controller import Robot, Motor, PositionSensor, GPS, Compass
 import math
 import threading
 import time
+import json
 
 # create the Robot instance.
 robot = Robot()
@@ -28,79 +29,117 @@ compass = robot.getCompass('compass')
 gps.enable(timestep)
 compass.enable(timestep)
 
+target_reached = False
+navigate = False
+location = []
+
 def init_moose():
     main = threading.Thread(target=moose_main)
     main.start()
 
-def norm(dir): 
-    dir_norm = []
-    for d in dir: 
-        dir_norm.append(d / abs(d))
-    return dir_norm
-
-def go_to_location():
-    global left_speed
-    global right_speed
-
-    pos = gps.getValues()
-    north = compass.getValues()
-    front = [-north[0], north[1], north[2]]
-
-    dir = [400 - pos[0], -450 - pos[2]]
-    distance = math.sqrt(dir[0] * dir[0] + dir[1] * dir[1])
-    #print(pos)
-    #print(north)
-    #print(front)
-    #print(dir)
-    #print(distance)
-    dir_norm = norm(dir)
-    #print(dir_norm)
-    angle = math.atan2(dir_norm[1], dir_norm[0]) - math.atan2(front[2], front[0])
-    #print(angle)
-    if angle < 0:
-        angle += 2 * math.pi
-
-    beta = angle - math.pi
-    #print(beta)
-    left_speed = 7.0 - math.pi + 4.0 * beta
-    right_speed = 7.0 - math.pi - 4.0 * beta
-
-def drive_forward(duration):
+def go_forward(duration):
     global left_speed
     global right_speed
     left_speed = 7.0
     right_speed = 7.0
-    time.sleep(duration)
-    left_speed = 0
-    right_speed = 0
+    if duration is not 0:
+        time.sleep(duration)
+        left_speed = 0
+        right_speed = 0
 
-def drive_backward(duration):
+def go_backward(duration):
     global left_speed
     global right_speed
     left_speed = -2.0
     right_speed = -2.0
-    time.sleep(duration)
-    left_speed = 0
-    right_speed = 0
+    if duration is not 0:
+        time.sleep(duration)
+        left_speed = 0
+        right_speed = 0
 
 
 def turn_left(duration):
     global left_speed
     global right_speed
-    left_speed = -2.0
-    right_speed = 2.0
-    time.sleep(duration)
-    left_speed = 0
-    right_speed = 0
+    left_speed = 1.0
+    right_speed = 4.0
+    if duration is not 0:
+        time.sleep(duration)
+        left_speed = 0
+        right_speed = 0
 
 def turn_right(duration):
     global left_speed
     global right_speed
-    left_speed = 2.0
-    right_speed = -2.0
-    time.sleep(duration)
+    left_speed = 4.0
+    right_speed = 1.0
+    if duration is not 0:
+        time.sleep(duration)
+        left_speed = 0
+        right_speed = 0
+
+def go_to_location(target):
+    global location
+    global navigate
+    if not location and target:
+        location = target
+    
+    navigate = True
+    while navigate:
+        time.sleep(1)
+
+# utilize a global JSON file for sending information between robots
+def receive_location_from_message():
+    global location
+    data = {}
+    # wait for message before starting to drive
+    while not location:
+        with open('../messages.json', 'r') as file:
+            data = json.load(file)
+            location = data['moose']['location']
+            time.sleep(1)
+        file.close()
+        
+    # clear message    
+    with open('../messages.json', 'w') as file:
+        data['moose']['location'] = []
+        json.dump(data, file)
+    file.close()
+
+def stop():
+    global left_speed
+    global right_speed
     left_speed = 0
     right_speed = 0
+
+def navigate_to_location():
+    global navigate
+
+    pos = gps.getValues()
+    north = compass.getValues()
+    front = [-north[0], north[1], north[2]]
+
+    dir = [location[0] - pos[0], location[1] - pos[2]]
+    distance = math.sqrt(dir[0] * dir[0] + dir[1] * dir[1])
+
+    # calculate the angle of which the vehicle is supposed to go to reach target
+    angle = math.atan2(dir[1], dir[0]) - math.atan2(front[2], front[0])
+    if angle < 0:
+        angle += 2 * math.pi
+
+    # vehicle is on the right path when angle ≈ math.pi 
+    if angle < math.pi - 0.01:
+        turn_left(0)
+    elif angle > math.pi + 0.01:
+        turn_right(0)
+    else:
+        go_forward(0)
+        
+    # stop vehicle and navigation when target has been reached 
+    if distance < 1:
+        print('Reached target')
+        navigate = False
+        stop()
 
 def moose_main():
     for motor in left_motors:
@@ -109,7 +148,8 @@ def moose_main():
         motor.setPosition(float('inf'))
 
     while robot.step(timestep) != -1:
-        go_to_location()
+        if navigate:
+            navigate_to_location()
         for motor in left_motors:
             motor.setVelocity(left_speed)
         for motor in right_motors:
