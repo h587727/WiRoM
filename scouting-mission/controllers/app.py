@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS
+import requests 
 
 app = Flask(__name__)
 CORS(app)
@@ -10,10 +11,11 @@ def make_controller():
     robots = mission['robots']
 
     for robot in robots:
-        f = open(robot['name'] + '_controller/' + robot['name'] + '_controller.py', 'w')
-        f.write('from ' + robot['name'] + '_simpleactions import * \n')
-        for action in robot['actions']:
-            f.write(action.lstrip() + '\n')
+    #    f = open(robot['name'] + '_controller/' + robot['name'] + '_controller.py', 'w')
+    #    f.write('from ' + robot['name'] + '_simpleactions import * \n')
+    #    for action in robot['actions']:
+    #        f.write(action.lstrip() + '\n')
+        requests.post('http://localhost:' + robot['port'] + '/simpleactions', json = robot['actions'])
     return 'Controllers successfully created', 200
     
 @app.route('/ping')

@@ -1,9 +1,14 @@
 """mavic2pro_controller simpleactions."""
 from controller import Robot, Motor, PositionSensor, Gyro, Camera, InertialUnit, GPS, Compass, CameraRecognitionObject
+from flask import Flask, request
+import requests 
 import math
 import threading
 import time
 import json
+
+# create flask instance
+app = Flask(__name__)
 
 # create the Robot instance.
 robot = Robot()
@@ -48,11 +53,18 @@ navigate = False
 target_reached = False
 message_recipient = ''
 target_location = []
+simpleactions = []
+
+# array which holds the 
 
 # Initialize which sets the target altitude as well as start the main loop
-def init():
+def init(port):
     main = threading.Thread(target=mavic2pro_main)
+    execute = threading.Thread(target=execute_simpleactions)
     main.start()
+    execute.start()
+    app.run(port=port)
+
 
 def set_altitude(target):
     global target_altitude
@@ -114,14 +126,8 @@ def stop_movement():
 
 # Utilize a global JSON file as a simple way of sending information between robots
 def send_location(rec_obj_pos):
-    with open('../messages.json', 'r') as file:
-        data = json.load(file)
-    file.close()
-
-    with open('../messages.json', 'w') as file:
-        data[message_recipient]['location'] = [rec_obj_pos[0], rec_obj_pos[2]]
-        json.dump(data, file)
-    file.close()
+    location_json =  {"location": [rec_obj_pos[0], rec_obj_pos[2]]}
+    requests.post("http://localhost:5002/location", json = location_json)
 
 # Function that finds the angle and distance to a location and moves the vehicle accordingly
 def navigate_to_location():
@@ -201,5 +207,21 @@ def mavic2pro_main():
         if recognise and message_recipient and camera.getRecognitionObjects():
             for rec_obj in camera.getRecognitionObjects():
                 rec_obj_pos = [gps.getValues()[0] - rec_obj.get_position()[0], gps.getValues()[1] - rec_obj.get_position()[1], gps.getValues()[2] - rec_obj.get_position()[2]]
-                send_location(rec_obj_pos)
+                send = threading.Thread(target=send_location, args=(rec_obj_pos,))
+                send.start()
                 recognise = False
+
+@app.route('/simpleactions', methods = ['POST'])
+def receive_simpleactions():
+    global simpleactions
+    simpleactions = request.get_json()
+    return "Updated simple actions", 200
+
+def execute_simpleactions():
+    global simpleactions
+    while robot.step(timestep) != -1:
+        if simpleactions:
+            action = simpleactions.pop(0)
+            action = action.replace('.', ',')
+            print(action)
+            eval(action)

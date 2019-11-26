@@ -13,19 +13,27 @@ class App extends Component {
 class ActionForm extends Component {
   state = {
     mission: {
-      robots : [
+      "robots" : [
         {
-          name : "mavic2pro",
-          language : "python",
-          actions : [
-            "takeoff(1.0)"
+          "name" : "mavic2pro",
+          "language" : "python",
+          "port" : "5001",
+          "actions" : [
+            "set_altitude(1)", 
+            "recognise_objects()", 
+            "set_message_target('moose')", 
+            "go_to_location([388. -365])", 
+            "turn_left(4)", 
+            "go_forward(4)"
           ]
         },
         {
-          name : "moose",
-          language : "python",
-          actions : [
-            "init_moose()"
+          "name" : "moose",
+          "language" : "python",
+          "port" : "5002",
+          "actions" : [
+            "receive_location_from_robot()",
+            "go_to_location([])"
           ]
         }
       ]

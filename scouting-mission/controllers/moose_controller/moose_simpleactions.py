@@ -1,10 +1,13 @@
 """moose_controller simpleactions."""
-
 from controller import Robot, Motor, PositionSensor, GPS, Compass
+from flask import Flask, request
 import math
 import threading
 import time
 import json
+
+# create flask instance
+app = Flask(__name__)
 
 # create the Robot instance.
 robot = Robot()
@@ -32,10 +35,14 @@ compass.enable(timestep)
 target_reached = False
 navigate = False
 location = []
+simpleactions = []
 
-def init():
+def init(port):
     main = threading.Thread(target=moose_main)
+    execute = threading.Thread(target=execute_simpleactions)
     main.start()
+    execute.start()
+    app.run(port=port)
 
 def go_forward(duration):
     global left_speed
@@ -88,24 +95,6 @@ def go_to_location(target):
     while navigate:
         time.sleep(1)
 
-# utilize a global JSON file for sending information between robots
-def receive_location_from_message():
-    global location
-    data = {}
-    # wait for message before starting to drive
-    while not location:
-        with open('../messages.json', 'r') as file:
-            data = json.load(file)
-            location = data['moose']['location']
-            time.sleep(1)
-        file.close()
-
-    # clear message    
-    with open('../messages.json', 'w') as file:
-        data['moose']['location'] = []
-        json.dump(data, file)
-    file.close()
-
 def stop():
     global left_speed
     global right_speed
@@ -141,6 +130,10 @@ def navigate_to_location():
         navigate = False
         stop()
 
+def receive_location_from_robot():
+    while not location:
+        time.sleep(1)
+
 def moose_main():
     for motor in left_motors:
         motor.setPosition(float('inf'))
@@ -155,5 +148,24 @@ def moose_main():
         for motor in right_motors:
             motor.setVelocity(right_speed)
 
+@app.route('/simpleactions', methods = ['POST'])
+def receive_simpleactions():
+    global simpleactions
+    simpleactions = request.get_json()
+    return "Updated simple actions", 200
 
-# Enter here exit cleanup code.
+@app.route('/location', methods = ['POST'])
+def receive_location():
+    global location
+    msg = request.get_json()
+    location = msg['location']
+    return "Received location", 200
+
+def execute_simpleactions():
+    global simpleactions
+    while robot.step(timestep) != -1:
+        if simpleactions:
+            action = simpleactions.pop(0)
+            action = action.replace('.', ',')
+            print(action)
+            eval(action)
