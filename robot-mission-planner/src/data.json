@@ -1,0 +1,100 @@
+{   
+    "robots" : {
+        "mavic2pro": {
+            "language" : "python",
+            "port" : "5001",
+            "simpleactions": {
+                "set_altitude()": {"args": 1},
+                "go_forward()": {"args": 1},
+                "go_backward()": {"args": 1},
+                "turn_right()": {"args": 1},
+                "turn_left()": {"args": 1},
+                "recognise_objects()": {"args": 0},
+                "go_to_location()": {"args": 1},
+                "set_message_target()": {"args": 1},
+                "stop_movement()": {"args": 0}
+            }
+        },
+        "moose": {
+            "language" : "python",
+            "port" : "5002",
+            "simpleactions": {
+                "go_forward()": {"args": 1},
+                "go_backward()": {"args": 1},
+                "turn_right()": {"args": 1},
+                "turn_left()": {"args": 1},
+                "go_to_location()": {"args": 1},
+                "stop_movement()": {"args": 0},
+                "receive_message_from_robot()":{"args":0}
+            }
+        }
+    },
+    "predefinedTasks": {
+        "scoutLocation": [
+            {"robot":"mavic2pro"},
+            "set_altitude(1)", 
+            "recognise_objects()", 
+            "go_to_location([388. -365])"
+        ],
+        "scoutArea": [
+            {"robot":"mavic2pro"},
+            "set_altitude(1)", 
+            "recognise_objects()",
+            "go_forward(30)",
+            "turn_left(3)",
+            "go_forward(30)",
+            "turn_left(3)",
+            "go_forward(30)",
+            "turn_left(3)",
+            "go_forward(30)"
+        ],
+        "sendMessage": [
+            {"robot":"mavic2pro"},
+            "set_message_target('moose')", 
+            "send_location()"
+        ],
+        "receiveAndGoToLocation": [
+            {"robot":"moose"},
+            "receive_location_from_robot()",
+            "go_to_location([])"
+        ]
+    },
+    "predefinedMissions": {
+        "scoutLocationAndDeliverItem": [
+            "scoutLocation",
+            "sendMessage",
+            "receiveAndGoToLocation"
+        ],
+        "scoutAreaAndDeliverItem": [
+            "scoutArea",
+            "sendMessage",
+            "receiveAndGoToLocation"
+        ]
+    },
+    "mission": {
+        "robots" : [
+        {
+            "name" : "mavic2pro",
+            "language" : "python",
+            "port" : "5001",
+            "actions" : [
+            "set_altitude(1)", 
+            "recognise_objects()", 
+            "set_message_target('moose')", 
+            "go_to_location([388. -365])", 
+            "turn_left(4)", 
+            "go_forward(4)"
+            ]
+        },
+        {
+            "name" : "moose",
+            "language" : "python",
+            "port" : "5002",
+            "actions" : [
+            "receive_location_from_robot()",
+            "go_to_location([])"
+            ]
+        }
+        ]
+    }
+}

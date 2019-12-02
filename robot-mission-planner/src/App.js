@@ -1,58 +1,176 @@
 import React, {Component} from 'react';
+import data from './data';
+import {SortableContainer, SortableElement} from 'react-sortable-hoc';
+import arrayMove from 'array-move';
+
+const SortableItem = SortableElement(({value}) => <li onClick={console.log(value)}>{value}</li>);
+
+const SortableList = SortableContainer(({items}) => {
+  return (
+    <ul>
+      {items.map((value, index) => (
+        <SortableItem key={`item-${value}`} index={index} value={value}/>
+      ))}
+    </ul>
+  );
+});
+
 class App extends Component {
+  state = {
+    robots: data.robots,
+    predefinedMissions: data.predefinedMissions,
+    predefinedTasks: data.predefinedTasks,
+    showInfo: "mavic2pro",
+    showTasks: "scoutLocationAndDeliverItem",
+    showSimpleactions: "scoutLocation",
+    mission: data.mission
+  }
+    
+  handleMissionClick = name => event => {
+    this.setState({showTasks: name});
+  }
+
+  handleTaskClick = name => event => {
+    this.setState({showSimpleactions: name});
+  }
+
+  handleTaskChange = items => event => {
+    console.log(items)
+    let mission = this.state.predefinedMissions[this.state.showTasks]
+    mission = items
+    this.setState(mission)
+  }
+
   render () {
     return (
       <div>
-        <ActionForm>
-        </ActionForm>
+        <Robot state={this.state}>
+        </Robot>
+
+        <MissionForm state={this.state}>
+        </MissionForm>
+
+        <Mission state={this.state} handleMissionClick={(mission) => this.handleMissionClick(mission)}>
+        </Mission>
+
+        <Task state={this.state} handleTaskClick={(mission) => this.handleTaskClick(mission)}>
+        </Task>
+
+        <Simpleactions state={this.state}>
+        </Simpleactions>
+
+        
       </div>
     );
   }
 }
 
-class ActionForm extends Component {
-  state = {
-    mission: {
-      "robots" : [
-        {
-          "name" : "mavic2pro",
-          "language" : "python",
-          "port" : "5001",
-          "actions" : [
-            "set_altitude(1)", 
-            "recognise_objects()", 
-            "set_message_target('moose')", 
-            "go_to_location([388. -365])", 
-            "turn_left(4)", 
-            "go_forward(4)"
-          ]
-        },
-        {
-          "name" : "moose",
-          "language" : "python",
-          "port" : "5002",
-          "actions" : [
-            "receive_location_from_robot()",
-            "go_to_location([])"
-          ]
-        }
-      ]
-    }
+class Mission extends Component {
+  state = {missions: this.props.state.predefinedMissions}
+
+  render(){
+    return(
+      <div>
+        <h1>Missions</h1>
+        {Object.keys(this.state.missions).map(m => (<button style={{marginBottom:15}} onClick={this.props.handleMissionClick(m)}>{m}</button>))}
+      </div>);
+  }
+}
+
+class SortableComponent extends Component {
+  componentWillReceiveProps(nextProps) {
+    this.setState({items: nextProps.state.predefinedMissions[nextProps.state.showTasks]});  
   }
 
+  state = {items: this.props.state.predefinedMissions[this.props.state.showTasks]}
+  onSortEnd = ({oldIndex, newIndex}) => {
+    this.setState(({items}) => ({
+      items: arrayMove(items, oldIndex, newIndex),
+    }));
+    console.log(this.state.items)
+    
+  };
+
+  render() {
+    return <SortableList items={this.state.items} onSortEnd={this.onSortEnd}/>;
+  }
+}
+
+class Task extends Component {
+  componentWillReceiveProps(nextProps) {
+    this.setState({missions: nextProps.state.predefinedMissions, showTasks: nextProps.state.showTasks});  
+  }
+  state = {missions: this.props.state.predefinedMissions, showTasks: this.props.state.showTasks}
+
+  render(){
+    return(
+      <div>
+        {this.state.missions[this.state.showTasks].map(t => (<button style={{display:"block"}} onClick={this.props.handleTaskClick(t)}>{t}</button>))}
+      </div>);
+  }
+}
+
+class Simpleactions extends Component {
+  componentWillReceiveProps(nextProps) {
+    this.setState({tasks: nextProps.state.predefinedTasks, showSimpleactions: nextProps.state.showSimpleactions});  
+  }
+  
+  state = {tasks: this.props.state.predefinedTasks, showSimpleactions: this.props.state.showSimpleactions}
+  render(){
+    return(
+      <div>
+        {this.state.tasks[this.state.showSimpleactions].slice(1).map(sa => <ul><li> {sa} </li></ul>)}
+      </div>);
+  }
+
+}
+
+class Robot extends Component {
+  state = {robots: this.props.state.robots, showInfo: this.props.state.showInfo}
+
+  handleRobotClick = name => event => {
+    this.setState({showInfo: name});
+  }
+
+  render(){
+    return(
+      <div>
+        <h1>
+          Robot information
+        </h1>
+
+        {Object.keys(this.state.robots).map(r => (<button onClick={this.handleRobotClick(r)}>{r}</button>))}
+
+        {
+          <ul>
+            <li>
+              {this.state.robots[this.state.showInfo].language}
+            </li>
+            <li>
+              {this.state.robots[this.state.showInfo].port}
+            </li>
+              <div>{Object.keys(this.state.robots[this.state.showInfo].simpleactions).map(sa => <li>{sa}</li>)}
+            </div>
+          </ul>
+        }
+      </div>);
+  }
+}
+
+class MissionForm extends Component {
   handleSubmit = event => {
-    sendMission(this.state.mission);
+    sendMission(this.props.state.mission);
     event.preventDefault();
   }
 
   handleRobotChange = event => {
-    const robot = this.state.mission.robots;
+    const robot = this.props.state.mission.robots;
     robot.name = event.target.value;
     this.setState(robot)
   }
 
   handleActionsChange = id => event => {
-    const robot = this.state.mission.robots[id];
+    const robot = this.props.state.mission.robots[id];
     robot.actions = [];
     event.target.value.split(',').forEach(e => {
       robot.actions.push(e);
@@ -68,13 +186,13 @@ class ActionForm extends Component {
         <form onSubmit={this.handleSubmit}>
           <input 
             type="text"
-            value={this.state.mission.robots[0].name}
+            value={this.props.state.mission.robots[0].name}
             onChange={this.handleRobotChange}
           />
 
           <input
             type="text"
-            value={this.state.mission.robots[0].actions}
+            value={this.props.state.mission.robots[0].actions}
             onChange={this.handleActionsChange(0)}
             style={{width: 200}}
           />
@@ -83,13 +201,13 @@ class ActionForm extends Component {
         <form onSubmit={this.handleSubmit}>
           <input 
             type="text"
-            value={this.state.mission.robots[1].name}
+            value={this.props.state.mission.robots[1].name}
             onChange={this.handleRobotChange}
           />
 
           <input 
             type="text"
-            value={this.state.mission.robots[1].actions}
+            value={this.props.state.mission.robots[1].actions}
             onChange={this.handleActionsChange(1)}
             style={{width: 200}}
           />
