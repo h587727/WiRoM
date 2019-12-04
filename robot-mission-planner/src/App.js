@@ -44,14 +44,18 @@ class App extends Component {
     let preMission = this.state.predefinedMissions[this.state.selectedMission]
     let preTasks = this.state.predefinedTasks
     let robots = this.state.robots
-    let mission = []
+    let mission = {}
 
     preMission.forEach(task => {
+      let simpleactions = []
       let robot = preTasks[task][0].robot
-      mission.push({[robot]: robots[robot]})
-      preTasks[task].slice(1).forEach(simpleaction => {
-        mission.push(simpleaction)
-      })
+
+      if (robot in mission)
+          simpleactions = mission[robot].simpleactions
+
+      mission[robot] = {port:robots[robot]["port"], language:robots[robot]["language"]}
+      preTasks[task].slice(1).forEach(simpleaction => { simpleactions.push(simpleaction) })
+      mission[robot].simpleactions = simpleactions
     })
     console.log(mission)
     this.setState({mission: mission})
