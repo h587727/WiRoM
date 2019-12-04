@@ -95,7 +95,7 @@ def go_to_location(target):
     while navigate:
         time.sleep(1)
 
-def stop():
+def stop_movement():
     global left_speed
     global right_speed
     left_speed = 0
@@ -128,7 +128,7 @@ def navigate_to_location():
     if distance < 1:
         print('Reached target')
         navigate = False
-        stop()
+        stop_movement()
 
 def receive_location_from_robot():
     while not location:

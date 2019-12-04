@@ -16,12 +16,14 @@ robot = Robot()
 # get the time step of the current world.
 timestep = int(robot.getBasicTimeStep())
 
+# get the motors for the robot
 front_left_motor = robot.getMotor('front left propeller')
 front_right_motor = robot.getMotor('front right propeller')
 rear_left_motor = robot.getMotor('rear left propeller')
 rear_right_motor = robot.getMotor('rear right propeller')
 motors = [front_left_motor, front_right_motor, rear_left_motor, rear_right_motor]
 
+# get and enable nodes used by the robot
 gyro = robot.getGyro('gyro')
 iu = robot.getInertialUnit('inertial unit')
 gps = robot.getGPS('gps')
@@ -54,8 +56,6 @@ target_reached = False
 message_recipient = ''
 target_location = []
 simpleactions = []
-
-# array which holds the 
 
 # Initialize which sets the target altitude as well as start the main loop
 def init(port):
@@ -192,7 +192,7 @@ def stabilize_and_control_movement():
     rear_right_motor.setVelocity(rear_right_motor_input)
 
 
-# main loop, starts the drone and keeps it stable at target altitude, and reading the global variables for target directions
+# main loop, starting and controlling the robot based on the global variables
 def mavic2pro_main():
     global recognise
 
@@ -204,6 +204,7 @@ def mavic2pro_main():
             navigate_to_location()
         
         stabilize_and_control_movement()
+        print("sending")
         if recognise and message_recipient and camera.getRecognitionObjects():
             for rec_obj in camera.getRecognitionObjects():
                 rec_obj_pos = [gps.getValues()[0] - rec_obj.get_position()[0], gps.getValues()[1] - rec_obj.get_position()[1], gps.getValues()[2] - rec_obj.get_position()[2]]

@@ -20,23 +20,45 @@ class App extends Component {
     robots: data.robots,
     predefinedMissions: data.predefinedMissions,
     predefinedTasks: data.predefinedTasks,
-    showInfo: "mavic2pro",
-    showTasks: "scoutLocationAndDeliverItem",
-    showSimpleactions: "scoutLocation",
+    showInfoForRobot: "mavic2pro",
+    selectedMission: "scoutLocationAndDeliverItem",
+    selectedTask: "scoutLocation",
     mission: data.mission
   }
     
   handleMissionClick = name => event => {
-    this.setState({showTasks: name});
+    this.setState({selectedMission: name});
+    this.handleMissionChange()
   }
 
   handleTaskClick = name => event => {
-    this.setState({showSimpleactions: name});
+    this.setState({selectedTask: name});
+  }
+
+  handleSubmit = event => {
+    sendMission(this.state);
+    event.preventDefault();
+  }
+
+  handleMissionChange = event => {
+    let preMission = this.state.predefinedMissions[this.state.selectedMission]
+    let preTasks = this.state.predefinedTasks
+    let robots = this.state.robots
+    let mission = []
+
+    preMission.forEach(task => {
+      let robot = preTasks[task][0].robot
+      mission.push({[robot]: robots[robot]})
+      preTasks[task].slice(1).forEach(simpleaction => {
+        mission.push(simpleaction)
+      })
+    })
+    console.log(mission)
+    this.setState({mission: mission})
   }
 
   handleTaskChange = items => event => {
-    console.log(items)
-    let mission = this.state.predefinedMissions[this.state.showTasks]
+    let mission = this.state.predefinedMissions[this.state.selectedMission]
     mission = items
     this.setState(mission)
   }
@@ -47,10 +69,9 @@ class App extends Component {
         <Robot state={this.state}>
         </Robot>
 
-        <MissionForm state={this.state}>
-        </MissionForm>
-
-        <Mission state={this.state} handleMissionClick={(mission) => this.handleMissionClick(mission)}>
+        <Mission 
+          state={this.state} 
+          handleMissionClick={(mission) => this.handleMissionClick(mission)}>
         </Mission>
 
         <Task state={this.state} handleTaskClick={(mission) => this.handleTaskClick(mission)}>
@@ -59,6 +80,9 @@ class App extends Component {
         <Simpleactions state={this.state}>
         </Simpleactions>
 
+        <button onClick={this.handleSubmit}>
+            Send mission
+        </button>
         
       </div>
     );
@@ -66,23 +90,23 @@ class App extends Component {
 }
 
 class Mission extends Component {
-  state = {missions: this.props.state.predefinedMissions}
+  state = {predefinedMissions: this.props.state.predefinedMissions}
 
   render(){
     return(
       <div>
         <h1>Missions</h1>
-        {Object.keys(this.state.missions).map(m => (<button style={{marginBottom:15}} onClick={this.props.handleMissionClick(m)}>{m}</button>))}
+        {Object.keys(this.state.predefinedMissions).map(m => (<button style={{marginBottom:15}} onClick={this.props.handleMissionClick(m)}>{m}</button>))}
       </div>);
   }
 }
 
 class SortableComponent extends Component {
   componentWillReceiveProps(nextProps) {
-    this.setState({items: nextProps.state.predefinedMissions[nextProps.state.showTasks]});  
+    this.setState({items: nextProps.state.predefinedMissions[nextProps.state.selectedMission]});  
   }
 
-  state = {items: this.props.state.predefinedMissions[this.props.state.showTasks]}
+  state = {items: this.props.state.predefinedMissions[this.props.state.selectedMission]}
   onSortEnd = ({oldIndex, newIndex}) => {
     this.setState(({items}) => ({
       items: arrayMove(items, oldIndex, newIndex),
@@ -98,38 +122,38 @@ class SortableComponent extends Component {
 
 class Task extends Component {
   componentWillReceiveProps(nextProps) {
-    this.setState({missions: nextProps.state.predefinedMissions, showTasks: nextProps.state.showTasks});  
+    this.setState({missions: nextProps.state.predefinedMissions, selectedMission: nextProps.state.selectedMission});  
   }
-  state = {missions: this.props.state.predefinedMissions, showTasks: this.props.state.showTasks}
+  state = {missions: this.props.state.predefinedMissions, selectedMission: this.props.state.selectedMission}
 
   render(){
     return(
       <div>
-        {this.state.missions[this.state.showTasks].map(t => (<button style={{display:"block"}} onClick={this.props.handleTaskClick(t)}>{t}</button>))}
+        {this.state.missions[this.state.selectedMission].map(t => (<button style={{display:"block"}} onClick={this.props.handleTaskClick(t)}>{t}</button>))}
       </div>);
   }
 }
 
 class Simpleactions extends Component {
   componentWillReceiveProps(nextProps) {
-    this.setState({tasks: nextProps.state.predefinedTasks, showSimpleactions: nextProps.state.showSimpleactions});  
+    this.setState({tasks: nextProps.state.predefinedTasks, selectedTask: nextProps.state.selectedTask});  
   }
   
-  state = {tasks: this.props.state.predefinedTasks, showSimpleactions: this.props.state.showSimpleactions}
+  state = {tasks: this.props.state.predefinedTasks, selectedTask: this.props.state.selectedTask}
   render(){
     return(
       <div>
-        {this.state.tasks[this.state.showSimpleactions].slice(1).map(sa => <ul><li> {sa} </li></ul>)}
+        {this.state.tasks[this.state.selectedTask].slice(1).map(sa => <ul><li> {sa} </li></ul>)}
       </div>);
   }
 
 }
 
 class Robot extends Component {
-  state = {robots: this.props.state.robots, showInfo: this.props.state.showInfo}
+  state = {robots: this.props.state.robots, showInfoForRobot: this.props.state.showInfoForRobot}
 
   handleRobotClick = name => event => {
-    this.setState({showInfo: name});
+    this.setState({showInfoForRobot: name});
   }
 
   render(){
@@ -144,12 +168,12 @@ class Robot extends Component {
         {
           <ul>
             <li>
-              {this.state.robots[this.state.showInfo].language}
+              {this.state.robots[this.state.showInfoForRobot].language}
             </li>
             <li>
-              {this.state.robots[this.state.showInfo].port}
+              {this.state.robots[this.state.showInfoForRobot].port}
             </li>
-              <div>{Object.keys(this.state.robots[this.state.showInfo].simpleactions).map(sa => <li>{sa}</li>)}
+              <div>{Object.keys(this.state.robots[this.state.showInfoForRobot].simpleactions).map(sa => <li>{sa}</li>)}
             </div>
           </ul>
         }
@@ -158,11 +182,6 @@ class Robot extends Component {
 }
 
 class MissionForm extends Component {
-  handleSubmit = event => {
-    sendMission(this.props.state.mission);
-    event.preventDefault();
-  }
-
   handleRobotChange = event => {
     const robot = this.props.state.mission.robots;
     robot.name = event.target.value;
@@ -176,6 +195,11 @@ class MissionForm extends Component {
       robot.actions.push(e);
     });
     this.setState(robot)
+  }
+
+  handleSubmit = event => {
+    sendMission(this.state);
+    event.preventDefault();
   }
 
   render(){
@@ -221,7 +245,8 @@ class MissionForm extends Component {
   }
 }
 
-function sendMission(mission){
+
+function sendMission(state){
   console.log('Sending request')
   fetch('http://localhost:5000/controller', {
     method: 'POST',
@@ -229,7 +254,7 @@ function sendMission(mission){
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(mission)
+    body: JSON.stringify(state.mission)
   })
   .then(res => console.log(res))
   .catch(console.log)
