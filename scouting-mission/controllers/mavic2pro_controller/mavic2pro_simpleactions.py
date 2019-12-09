@@ -50,6 +50,7 @@ pitch_disturbance = 0
 yaw_disturbance = 0
 
 # variables to set drone functions
+rec_obj_pos = []
 recognise = False
 navigate = False
 target_reached = False
@@ -125,13 +126,22 @@ def stop_movement():
     yaw_disturbance = 0
 
 # Utilize a global JSON file as a simple way of sending information between robots
-def send_location(rec_obj_pos):
+def send_location():
+    global recognise
+    global navigate
+    send = threading.Thread(target=async_send_location)
+    send.start()
+    #recognise = True
+    #navigate = True
+
+def async_send_location():
     location_json =  {"location": [rec_obj_pos[0], rec_obj_pos[2]]}
     requests.post("http://localhost:5002/location", json = location_json)
 
 # Function that finds the angle and distance to a location and moves the vehicle accordingly
 def navigate_to_location():
     global navigate
+    global location
 
     pos = gps.getValues()
     north = compass.getValues()
@@ -156,6 +166,7 @@ def navigate_to_location():
     if distance < 1:
         print('Reached target')
         navigate = False
+        location = []
         stop_movement()
 
 def CLAMP(value, low, high):
@@ -195,6 +206,8 @@ def stabilize_and_control_movement():
 # main loop, starting and controlling the robot based on the global variables
 def mavic2pro_main():
     global recognise
+    global navigate
+    global rec_obj_pos
 
     for motor in motors:
         motor.setPosition(float('inf'))
@@ -204,13 +217,12 @@ def mavic2pro_main():
             navigate_to_location()
         
         stabilize_and_control_movement()
-        print("sending")
-        if recognise and message_recipient and camera.getRecognitionObjects():
+        if recognise and camera.getRecognitionObjects():
             for rec_obj in camera.getRecognitionObjects():
                 rec_obj_pos = [gps.getValues()[0] - rec_obj.get_position()[0], gps.getValues()[1] - rec_obj.get_position()[1], gps.getValues()[2] - rec_obj.get_position()[2]]
-                send = threading.Thread(target=send_location, args=(rec_obj_pos,))
-                send.start()
                 recognise = False
+                navigate = False
+                stop_movement()
 
 @app.route('/simpleactions', methods = ['POST'])
 def receive_simpleactions():
@@ -223,6 +235,5 @@ def execute_simpleactions():
     while robot.step(timestep) != -1:
         if simpleactions:
             action = simpleactions.pop(0)
-            action = action.replace('.', ',')
             print(action)
             eval(action)

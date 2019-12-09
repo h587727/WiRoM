@@ -165,7 +165,7 @@ def execute_simpleactions():
     global simpleactions
     while robot.step(timestep) != -1:
         if simpleactions:
+            print("Test")
             action = simpleactions.pop(0)
-            action = action.replace('.', ',')
             print(action)
             eval(action)

@@ -8,12 +8,19 @@ CORS(app)
 @app.route('/controller', methods = ['POST'])
 def make_controller():
     mission = request.get_json()
+    print(mission)
     for robot in mission:
-        print(mission[robot])
+        sequence = []
+        for simpleaction in mission[robot]['simpleactions']:
+            if simpleaction['args'] is None:
+                sequence.append(simpleaction['name'] + "()")
+            else:
+                sequence.append(simpleaction['name'] + "(" + simpleaction['args'] + ")")
+
         print(mission[robot]['port'])
         print(mission[robot]['language'])
-        print(mission[robot]['simpleactions'])
-        requests.post('http://localhost:' + mission[robot]['port'] + '/simpleactions', json = mission[robot]['simpleactions'])
+        print(sequence)
+        requests.post('http://localhost:' + mission[robot]['port'] + '/simpleactions', json = sequence)
 
     #    f = open(robot['name'] + '_controller/' + robot['name'] + '_controller.py', 'w')
     #    f.write('from ' + robot['name'] + '_simpleactions import * \n')
