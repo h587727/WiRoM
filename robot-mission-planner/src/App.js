@@ -2,6 +2,9 @@ import React, {Component} from 'react';
 import data from './data';
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import arrayMove from 'array-move';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css'
+import {Button, Form, ButtonGroup, Container, Col, Row, ListGroup, ListGroupItem, ToggleButton, ToggleButtonGroup, ButtonToolbar} from 'react-bootstrap';
 
 const SortableItem = SortableElement(({value}) => <li onClick={console.log(value)}>{value}</li>);
 
@@ -19,11 +22,15 @@ class App extends Component {
   state = {
     robots: data.robots,
     predefinedMissions: data.predefinedMissions,
-    predefinedTasks: data.predefinedTasks,
+    tasks: data.predefinedTasks,
     showInfoForRobot: "mavic2pro",
     selectedMission: "scoutLocationAndDeliverItem",
     selectedTask: "scoutLocation",
-    mission: data.mission
+    mission: {}
+  }
+
+  componentDidMount() {
+    this.handleMissionChange()
   }
     
   handleMissionClick = name => event => {
@@ -35,6 +42,24 @@ class App extends Component {
     this.setState({selectedTask: name});
   }
 
+  handleSimpleActionArgsChange = sa => event => {
+    let task = this.state.tasks[this.state.selectedTask]
+    let newTask = task
+
+    newTask[task.indexOf(sa)].args = event.target.value
+    this.setState({task: newTask})
+    this.handleMissionChange()
+  }
+
+  handleSimpleActionRobotChange = sa => event => {
+    let task = this.state.tasks[this.state.selectedTask]
+    let newTask = task
+
+    newTask[task.indexOf(sa)].robot = event.target.value
+    this.setState({task: newTask})
+    this.handleMissionChange()
+  }
+
   handleSubmit = event => {
     sendMission(this.state);
     event.preventDefault();
@@ -42,20 +67,23 @@ class App extends Component {
 
   handleMissionChange = event => {
     let preMission = this.state.predefinedMissions[this.state.selectedMission]
-    let preTasks = this.state.predefinedTasks
+    let tasks = this.state.tasks
     let robots = this.state.robots
     let mission = {}
 
     preMission.forEach(task => {
-      let simpleactions = []
-      let robot = preTasks[task][0].robot
+      tasks[task].forEach(simpleaction => {
+        let robot = simpleaction.robot
+        let simpleactions = [simpleaction]
 
-      if (robot in mission)
+        if (robot in mission){
           simpleactions = mission[robot].simpleactions
-
-      mission[robot] = {port:robots[robot]["port"], language:robots[robot]["language"]}
-      preTasks[task].slice(1).forEach(simpleaction => { simpleactions.push(simpleaction) })
-      mission[robot].simpleactions = simpleactions
+          simpleactions.push(simpleaction)
+        }
+        else
+          mission[robot] = {port:robots[robot]["port"], language:robots[robot]["language"]}
+        mission[robot].simpleactions = simpleactions
+      })
     })
     console.log(mission)
     this.setState({mission: mission})
@@ -69,26 +97,36 @@ class App extends Component {
 
   render () {
     return (
-      <div>
+      <Container>
         <Robot state={this.state}>
         </Robot>
 
-        <Mission 
-          state={this.state} 
-          handleMissionClick={(mission) => this.handleMissionClick(mission)}>
-        </Mission>
+        <Row>
+          <Mission 
+            state={this.state} 
+            handleMissionClick={(mission) => this.handleMissionClick(mission)}>
+          </Mission>
+        </Row>
 
-        <Task state={this.state} handleTaskClick={(mission) => this.handleTaskClick(mission)}>
-        </Task>
+        <Row style={{marginBottom:"15px"}}>
+          <Col>
+            <Task state={this.state} handleTaskClick={(mission) => this.handleTaskClick(mission)}>
+            </Task>
+          </Col>
 
-        <Simpleactions state={this.state}>
-        </Simpleactions>
+          <Col xs={9}>
+            <Simpleactions 
+            state={this.state} 
+            handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
+            handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}>
+            </Simpleactions>
+          </Col>
+        </Row>
 
-        <button onClick={this.handleSubmit}>
+        <Button style={{marginBottom:"15px"}} variant="outline-dark" onClick={this.handleSubmit}>
             Send mission
-        </button>
-        
-      </div>
+        </Button>       
+      </Container>
     );
   }
 }
@@ -97,10 +135,18 @@ class Mission extends Component {
   state = {predefinedMissions: this.props.state.predefinedMissions}
 
   render(){
+    let numMissions = Object.keys(this.state.predefinedMissions).length
     return(
-      <div>
+      <div style={{marginLeft:"15px"}}>
         <h1>Missions</h1>
-        {Object.keys(this.state.predefinedMissions).map(m => (<button style={{marginBottom:15}} onClick={this.props.handleMissionClick(m)}>{m}</button>))}
+        
+        <ButtonToolbar>
+          <ToggleButtonGroup type="radio" name="options" defaultValue={numMissions}>
+            {Object.keys(this.state.predefinedMissions).map(m => (
+              <ToggleButton value={numMissions--} variant="outline-dark" style={{marginBottom:15}} onClick={this.props.handleMissionClick(m)}>{m}</ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        </ButtonToolbar>
       </div>);
   }
 }
@@ -129,25 +175,69 @@ class Task extends Component {
     this.setState({missions: nextProps.state.predefinedMissions, selectedMission: nextProps.state.selectedMission});  
   }
   state = {missions: this.props.state.predefinedMissions, selectedMission: this.props.state.selectedMission}
-
+  
   render(){
+    let numTasks = Object.keys(this.state.missions[this.state.selectedMission]).length
     return(
       <div>
-        {this.state.missions[this.state.selectedMission].map(t => (<button style={{display:"block"}} onClick={this.props.handleTaskClick(t)}>{t}</button>))}
+        <h3>
+          Tasks
+        </h3>
+        <ButtonToolbar>
+          <ToggleButtonGroup type="radio" name="options" defaultValue={numTasks} vertical>
+          {this.state.missions[this.state.selectedMission].map(t => (
+            <ToggleButton value={numTasks--} variant="outline-dark" style={{display:"block"}} onClick={this.props.handleTaskClick(t)}> {t}</ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        </ButtonToolbar>
       </div>);
   }
 }
 
 class Simpleactions extends Component {
   componentWillReceiveProps(nextProps) {
-    this.setState({tasks: nextProps.state.predefinedTasks, selectedTask: nextProps.state.selectedTask});  
+    this.setState({robots: nextProps.state.robots, tasks: nextProps.state.tasks, selectedTask: nextProps.state.selectedTask});  
   }
-  
-  state = {tasks: this.props.state.predefinedTasks, selectedTask: this.props.state.selectedTask}
+
+  findRobotsWithSimpleaction(sa) {
+    let select = []
+    for (let robot in this.state.robots){
+      if (sa in this.state.robots[robot].simpleactions)
+        select.push(<option> {robot} </option>)
+    }
+    return select
+  }
+
+  renderSimpleAction(sa) {    
+    let simpleaction = sa.name;
+    let args = sa.args;
+    return (
+        <ListGroup horizontal>
+          <ListGroupItem style={{minWidth:"250px"}}>
+            {simpleaction} 
+          </ListGroupItem>
+          <Form>
+            <Form.Control as="input" style={{ marginLeft:"5px"}}
+              value={args}
+              onChange={this.props.handleSimpleActionArgsChange(sa)}>
+            </Form.Control>
+          </Form>
+          <Form>
+            <Form.Control as="select" value={sa["robot"]} onChange={this.props.handleSimpleActionRobotChange(sa)} style={{marginLeft:"10px"}}>
+              {this.findRobotsWithSimpleaction(simpleaction)})}
+            </Form.Control>
+          </Form>
+          
+        </ListGroup>);
+  }
+
+  state = {robots: this.props.state.robots, tasks: this.props.state.tasks, selectedTask: this.props.state.selectedTask}
   render(){
     return(
-      <div>
-        {this.state.tasks[this.state.selectedTask].slice(1).map(sa => <ul><li> {sa} </li></ul>)}
+      <div style={{ marginBottom:"15px"}}>
+        <h3>Simpleactions</h3>
+        
+        {this.state.tasks[this.state.selectedTask].map(sa => this.renderSimpleAction(sa))}
       </div>);
   }
 
@@ -161,94 +251,40 @@ class Robot extends Component {
   }
 
   render(){
+    let numRobots = Object.keys(this.state.robots).length
     return(
       <div>
         <h1>
           Robot information
         </h1>
 
-        {Object.keys(this.state.robots).map(r => (<button onClick={this.handleRobotClick(r)}>{r}</button>))}
-
-        {
-          <ul>
-            <li>
-              {this.state.robots[this.state.showInfoForRobot].language}
-            </li>
-            <li>
-              {this.state.robots[this.state.showInfoForRobot].port}
-            </li>
-              <div>{Object.keys(this.state.robots[this.state.showInfoForRobot].simpleactions).map(sa => <li>{sa}</li>)}
-            </div>
-          </ul>
-        }
+        <Row>
+          <Col>
+            <ButtonToolbar>
+              <ToggleButtonGroup type="radio" name="options" defaultValue={numRobots} vertical>
+                  {Object.keys(this.state.robots).map(r => (
+                    <ToggleButton value={numRobots--} size="sm" variant="outline-dark" onClick={this.handleRobotClick(r)}>{r}</ToggleButton>)
+                  )}
+                </ToggleButtonGroup>
+            </ButtonToolbar>
+          </Col>
+        
+          <Col xs={10}>
+            <ListGroup>
+              <ListGroupItem>
+                Language: {this.state.robots[this.state.showInfoForRobot].language}
+              </ListGroupItem>
+              <ListGroupItem>
+                Port: {this.state.robots[this.state.showInfoForRobot].port}
+              </ListGroupItem>
+                <div>{Object.keys(this.state.robots[this.state.showInfoForRobot].simpleactions).map(sa => <ListGroupItem>{sa}</ListGroupItem>)}
+              </div>
+            </ListGroup>
+          </Col>
+        </Row>
       </div>);
   }
 }
-
-class MissionForm extends Component {
-  handleRobotChange = event => {
-    const robot = this.props.state.mission.robots;
-    robot.name = event.target.value;
-    this.setState(robot)
-  }
-
-  handleActionsChange = id => event => {
-    const robot = this.props.state.mission.robots[id];
-    robot.actions = [];
-    event.target.value.split(',').forEach(e => {
-      robot.actions.push(e);
-    });
-    this.setState(robot)
-  }
-
-  handleSubmit = event => {
-    sendMission(this.state);
-    event.preventDefault();
-  }
-
-  render(){
-    return(
-      <div>
-        <h1>Select robot mission</h1>
-
-        <form onSubmit={this.handleSubmit}>
-          <input 
-            type="text"
-            value={this.props.state.mission.robots[0].name}
-            onChange={this.handleRobotChange}
-          />
-
-          <input
-            type="text"
-            value={this.props.state.mission.robots[0].actions}
-            onChange={this.handleActionsChange(0)}
-            style={{width: 200}}
-          />
-        </form>
-
-        <form onSubmit={this.handleSubmit}>
-          <input 
-            type="text"
-            value={this.props.state.mission.robots[1].name}
-            onChange={this.handleRobotChange}
-          />
-
-          <input 
-            type="text"
-            value={this.props.state.mission.robots[1].actions}
-            onChange={this.handleActionsChange(1)}
-            style={{width: 200}}
-          />
-
-          <button type="submit">
-            Send mission
-          </button>
-        </form>
-      </div>
-    );
-  }
-}
-
 
 function sendMission(state){
   console.log('Sending request')
