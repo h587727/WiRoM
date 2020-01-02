@@ -4,7 +4,7 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import arrayMove from 'array-move';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
-import {Button, Form, ButtonGroup, Container, Col, Row, ListGroup, ListGroupItem, ToggleButton, ToggleButtonGroup, ButtonToolbar} from 'react-bootstrap';
+import {Button, Form, DropdownButton, DropdownItem, Container, Col, Row, ListGroup, ListGroupItem, ToggleButton, ToggleButtonGroup, ButtonToolbar} from 'react-bootstrap';
 
 const SortableItem = SortableElement(({value}) => <li onClick={console.log(value)}>{value}</li>);
 
@@ -26,11 +26,23 @@ class App extends Component {
     showInfoForRobot: "mavic2pro",
     selectedMission: "scoutLocationAndDeliverItem",
     selectedTask: "scoutLocation",
+    availableSimpleactions: [],
     mission: {}
   }
 
   componentDidMount() {
     this.handleMissionChange()
+    this.handleAvailableSimpleactionsChange()
+  }
+
+  handleAvailableSimpleactionsChange = event => {
+    let availableSimpleactions = []
+    for (let r in this.state.robots) {
+      for (let sa in this.state.robots[r].simpleactions) { 
+        availableSimpleactions.push({"name":sa, "robot":r, "numArgs":sa.numArgs})
+      }
+    }
+    this.setState({availableSimpleactions: availableSimpleactions})
   }
     
   handleMissionClick = name => event => {
@@ -95,37 +107,75 @@ class App extends Component {
     this.setState(mission)
   }
 
+  handleAddNewTask = taskName => event => {
+    console.log(taskName)
+    let tasks = this.state.tasks
+    let preMission = this.state.predefinedMissions
+    
+    tasks[taskName] = []
+    preMission[this.state.selectedMission].push(taskName)
+    this.setState({tasks: tasks})
+    this.setState({predefinedMissions: preMission})
+    event.preventDefault()
+  }
+
+  handleAddNewSimpleaction = sa => event => {
+    let tasks = this.state.tasks
+    tasks[this.state.selectedTask].push({"name":sa.name, "args":"0", "robot":sa.robot})
+    this.setState({tasks: tasks})
+  }
+
+  print = event => {
+    console.log("Test")
+  }
+
   render () {
     return (
       <Container>
-        <Robot state={this.state}>
-        </Robot>
+        <div class="shadow p-3 mb-5 bg-white rounded">
+          <Robot state={this.state}>
+          </Robot>
+        </div>
+        <div class="shadow p-3 mb-5 bg-white rounded">
+          <div class="shadow p-3 mb-5 bg-white rounded">
+            <Row>
+              <Mission 
+                state={this.state} 
+                handleMissionClick={(mission) => this.handleMissionClick(mission)}>
+              </Mission>
+            </Row>
+          </div>
+          
+          <Row style={{marginBottom:"15px"}}>
+            <Col>
+              <div class="shadow p-3 mb-5 bg-white rounded">
+                <Task state={this.state} handleTaskClick={(mission) => this.handleTaskClick(mission)}>
+                </Task>
 
-        <Row>
-          <Mission 
-            state={this.state} 
-            handleMissionClick={(mission) => this.handleMissionClick(mission)}>
-          </Mission>
-        </Row>
+                <NewTask state = {this.state} handleAddNewTask={(taskName) => this.handleAddNewTask(taskName)} print={() => this.print()}>
+                </NewTask>
+              </div>
+            </Col>
 
-        <Row style={{marginBottom:"15px"}}>
-          <Col>
-            <Task state={this.state} handleTaskClick={(mission) => this.handleTaskClick(mission)}>
-            </Task>
-          </Col>
+            <Col xs={9}>
+              <div class="shadow p-3 mb-5 bg-white rounded">
+                <Simpleactions 
+                  state={this.state} 
+                  handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
+                  handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}>
+                </Simpleactions>
 
-          <Col xs={9}>
-            <Simpleactions 
-            state={this.state} 
-            handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
-            handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}>
-            </Simpleactions>
-          </Col>
-        </Row>
-
-        <Button style={{marginBottom:"15px"}} variant="outline-dark" onClick={this.handleSubmit}>
-            Send mission
-        </Button>       
+                <DropdownButton title="Add new simpleaction" variant="outline-dark">
+                  {this.state.availableSimpleactions.map(sa => <DropdownItem onClick={this.handleAddNewSimpleaction(sa)}> {sa.name} </DropdownItem>)}
+                </DropdownButton>
+              </div>
+            </Col>
+          </Row>
+        
+          <Button type="submit" style={{marginBottom:"15px"}} variant="dark" onClick={this.handleSubmit}>
+              Send mission
+          </Button>
+        </div>
       </Container>
     );
   }
@@ -258,31 +308,48 @@ class Robot extends Component {
           Robot information
         </h1>
 
-        <Row>
-          <Col>
-            <ButtonToolbar>
-              <ToggleButtonGroup type="radio" name="options" defaultValue={numRobots} vertical>
-                  {Object.keys(this.state.robots).map(r => (
-                    <ToggleButton value={numRobots--} size="sm" variant="outline-dark" onClick={this.handleRobotClick(r)}>{r}</ToggleButton>)
-                  )}
-                </ToggleButtonGroup>
-            </ButtonToolbar>
-          </Col>
-        
-          <Col xs={10}>
-            <ListGroup>
-              <ListGroupItem>
-                Language: {this.state.robots[this.state.showInfoForRobot].language}
-              </ListGroupItem>
-              <ListGroupItem>
-                Port: {this.state.robots[this.state.showInfoForRobot].port}
-              </ListGroupItem>
-                <div>{Object.keys(this.state.robots[this.state.showInfoForRobot].simpleactions).map(sa => <ListGroupItem>{sa}</ListGroupItem>)}
-              </div>
-            </ListGroup>
-          </Col>
-        </Row>
+        <ButtonToolbar style={{marginBottom:"15px"}}>
+          <ToggleButtonGroup type="radio" name="options" defaultValue={numRobots}>
+              {Object.keys(this.state.robots).map(r => (
+                <ToggleButton value={numRobots--} size="sm" variant="outline-dark" onClick={this.handleRobotClick(r)}>{r}</ToggleButton>)
+              )}
+            </ToggleButtonGroup>
+        </ButtonToolbar>
+      
+        <ListGroup style={{marginBottom:"15px"}}>
+          <ListGroupItem>
+            Language: {this.state.robots[this.state.showInfoForRobot].language}
+          </ListGroupItem>
+          <ListGroupItem>
+            Port: {this.state.robots[this.state.showInfoForRobot].port}
+          </ListGroupItem>
+            <div>{Object.keys(this.state.robots[this.state.showInfoForRobot].simpleactions).map(sa => <ListGroupItem>{sa}</ListGroupItem>)}
+          </div>
+        </ListGroup>
       </div>);
+  }
+}
+
+class NewTask extends Component {
+  state = this.props.state
+
+  handleNameChange = event => {
+    let taskName = event.target.value
+    this.setState({taskName: taskName})
+  }
+
+  render() { 
+    return(
+    <Form onSubmit={this.props.handleAddNewTask(this.state.taskName)}>
+      <Form.Group>
+        <Form.Control onChange={this.handleNameChange} required placeholder="Task name" type="input"/>
+      </Form.Group>
+
+      <Button type="submit" variant="outline-dark" style={{marginTop:"10px"}}>
+        Add new task
+      </Button>
+    </Form>
+    )
   }
 }
 
