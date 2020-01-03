@@ -49,17 +49,20 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-    <div style="margin-left:50px">
+    <div class="container-fluid">
+      <div class="shadow p-3 mb-5 bg-white rounded">
         <h1>Webots streaming viewer</h1>
 
-          Connect to:
-          <input id="IPInput" type="text" value="localhost" />
-          :
-          <input id="PortInput" type="text" value="1234" />
-          <input id="ConnectButton" type="button" value="Connect" onclick="connect()" />
+        Connect to:
+        <input id="IPInput" type="text" value="localhost" />
+        :
+        <input id="PortInput" type="text" value="1234" />
+        <input id="ConnectButton" type="button" value="Connect" onclick="connect()" />
 
+
+        <div id="playerDiv">
+        </div>
       </div>
-      <div id="playerDiv">
     </div>
   </body>
 </html>

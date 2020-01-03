@@ -4,7 +4,8 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import arrayMove from 'array-move';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
-import {Button, Form, DropdownButton, DropdownItem, Container, Col, Row, ListGroup, ListGroupItem, ToggleButton, ToggleButtonGroup, ButtonToolbar} from 'react-bootstrap';
+import {Button, Form, Dropdown, DropdownButton, Container, Col, Row, ListGroup, ListGroupItem, ToggleButton, ToggleButtonGroup, ButtonToolbar} from 'react-bootstrap';
+import { object } from 'prop-types';
 
 const SortableItem = SortableElement(({value}) => <li onClick={console.log(value)}>{value}</li>);
 
@@ -17,6 +18,53 @@ const SortableList = SortableContainer(({items}) => {
     </ul>
   );
 });
+
+// The forwardRef is important!!
+// Dropdown needs access to the DOM node in order to position the Menu
+const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+  <a
+    href=""
+    ref={ref}
+    onClick={e => {
+      e.preventDefault();
+      onClick(e);
+    }}
+  >
+    {children}
+    &#x25bc;
+  </a>
+));
+
+// forwardRef again here!
+// Dropdown needs access to the DOM of the Menu to measure it
+const CustomMenu = React.forwardRef(
+  ({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
+    const [value, setValue] = React.useState('');
+
+    return (
+      <div
+        ref={ref}
+        style={style}
+        className={className}
+        aria-labelledby={labeledBy}
+      >
+        <Form.Control
+          autoFocus
+          className="mx-3 my-2 w-auto"
+          placeholder="Type to filter..."
+          onChange={e => setValue(e.target.value)}
+          value={value}
+        />
+        <ul className="list-unstyled">
+          {React.Children.toArray(children).filter(
+            child =>
+              !value || child.props.children[1].toLowerCase().includes(value),
+          )}
+        </ul>
+      </div>
+    );
+  },
+);
 
 class App extends Component {
   state = {
@@ -38,6 +86,7 @@ class App extends Component {
   handleAvailableSimpleactionsChange = event => {
     let availableSimpleactions = []
     for (let r in this.state.robots) {
+      let i = 0
       for (let sa in this.state.robots[r].simpleactions) { 
         availableSimpleactions.push({"name":sa, "robot":r, "numArgs":sa.numArgs})
       }
@@ -101,14 +150,7 @@ class App extends Component {
     this.setState({mission: mission})
   }
 
-  handleTaskChange = items => event => {
-    let mission = this.state.predefinedMissions[this.state.selectedMission]
-    mission = items
-    this.setState(mission)
-  }
-
   handleAddNewTask = taskName => event => {
-    console.log(taskName)
     let tasks = this.state.tasks
     let preMission = this.state.predefinedMissions
     
@@ -121,8 +163,20 @@ class App extends Component {
 
   handleAddNewSimpleaction = sa => event => {
     let tasks = this.state.tasks
-    tasks[this.state.selectedTask].push({"name":sa.name, "args":"0", "robot":sa.robot})
+    tasks[this.state.selectedTask].push({"name":sa.name, "args":"", "robot":sa.robot})
     this.setState({tasks: tasks})
+  }
+
+  handleRemoveTask = taskName => event => {
+    let preMission = this.state.predefinedMissions[this.state.selectedMission]
+    preMission.splice(preMission.indexOf(taskName), 1)
+    this.setState({preMission: preMission})
+  }
+
+  handleRemoveSimpleaction = simpleaction => event => {
+    let task = this.state.tasks[this.state.selectedTask]
+    task.splice(task.indexOf(simpleaction), 1)
+    this.setState({task: task})
   }
 
   print = event => {
@@ -131,11 +185,8 @@ class App extends Component {
 
   render () {
     return (
-      <Container>
-        <div class="shadow p-3 mb-5 bg-white rounded">
-          <Robot state={this.state}>
-          </Robot>
-        </div>
+      <Container fluid>
+        
         <div class="shadow p-3 mb-5 bg-white rounded">
           <div class="shadow p-3 mb-5 bg-white rounded">
             <Row>
@@ -149,7 +200,7 @@ class App extends Component {
           <Row style={{marginBottom:"15px"}}>
             <Col>
               <div class="shadow p-3 mb-5 bg-white rounded">
-                <Task state={this.state} handleTaskClick={(mission) => this.handleTaskClick(mission)}>
+                <Task state={this.state} handleTaskClick={(mission) => this.handleTaskClick(mission)} handleRemoveTask={(task) => this.handleRemoveTask(task)}>
                 </Task>
 
                 <NewTask state = {this.state} handleAddNewTask={(taskName) => this.handleAddNewTask(taskName)} print={() => this.print()}>
@@ -157,17 +208,31 @@ class App extends Component {
               </div>
             </Col>
 
-            <Col xs={9}>
+            <Col xs={6}>
               <div class="shadow p-3 mb-5 bg-white rounded">
                 <Simpleactions 
                   state={this.state} 
                   handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
-                  handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}>
-                </Simpleactions>
+                  handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}
+                  handleRemoveSimpleaction={(sa) => this.handleRemoveSimpleaction(sa)}>
 
-                <DropdownButton title="Add new simpleaction" variant="outline-dark">
-                  {this.state.availableSimpleactions.map(sa => <DropdownItem onClick={this.handleAddNewSimpleaction(sa)}> {sa.name} </DropdownItem>)}
-                </DropdownButton>
+                </Simpleactions>
+                
+                <Dropdown>
+                  <Dropdown.Toggle id="dropdown-custom-components" as={CustomToggle} title="Add new simpleaction">
+                    Add new simpleaction  
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu as={CustomMenu}>
+                    {this.state.availableSimpleactions.map(sa => <Dropdown.Item onClick={this.handleAddNewSimpleaction(sa)}> {sa.name} ({sa.robot}) </Dropdown.Item>)}
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+            </Col>
+            <Col>
+              <div class="shadow p-3 mb-5 bg-white rounded">
+                <Robot state={this.state}>
+                </Robot>
               </div>
             </Col>
           </Row>
@@ -234,11 +299,25 @@ class Task extends Component {
           Tasks
         </h3>
         <ButtonToolbar>
+          <Row>
+            <Col>
           <ToggleButtonGroup type="radio" name="options" defaultValue={numTasks} vertical>
-          {this.state.missions[this.state.selectedMission].map(t => (
-            <ToggleButton value={numTasks--} variant="outline-dark" style={{display:"block"}} onClick={this.props.handleTaskClick(t)}> {t}</ToggleButton>
+            {this.state.missions[this.state.selectedMission].map(t => (
+              <ToggleButton value={numTasks--} variant="outline-dark" style={{display:"block"}} onClick={this.props.handleTaskClick(t)}> {t}  
+              </ToggleButton> 
             ))}
-          </ToggleButtonGroup>
+            </ToggleButtonGroup>
+            </Col>
+            <Col>
+            {this.state.missions[this.state.selectedMission].map(t => (
+              <Row>
+              <Button style={{marginLeft:"15px"}}onClick={this.props.handleRemoveTask(t)} variant="outline-dark">
+                X
+              </Button>
+              </Row>
+            ))}
+           </Col>
+          </Row>
         </ButtonToolbar>
       </div>);
   }
@@ -272,21 +351,26 @@ class Simpleactions extends Component {
               onChange={this.props.handleSimpleActionArgsChange(sa)}>
             </Form.Control>
           </Form>
+
           <Form>
             <Form.Control as="select" value={sa["robot"]} onChange={this.props.handleSimpleActionRobotChange(sa)} style={{marginLeft:"10px"}}>
               {this.findRobotsWithSimpleaction(simpleaction)})}
             </Form.Control>
           </Form>
-          
+
+          <Button style={{marginLeft:"15px"}}onClick={this.props.handleRemoveSimpleaction(sa)} variant="outline-dark">
+            X
+          </Button>
         </ListGroup>);
   }
 
   state = {robots: this.props.state.robots, tasks: this.props.state.tasks, selectedTask: this.props.state.selectedTask}
   render(){
+    console.log(this.state.tasks, this.state.selectedTask)
     return(
       <div style={{ marginBottom:"15px"}}>
         <h3>Simpleactions</h3>
-        
+
         {this.state.tasks[this.state.selectedTask].map(sa => this.renderSimpleAction(sa))}
       </div>);
   }
@@ -304,9 +388,9 @@ class Robot extends Component {
     let numRobots = Object.keys(this.state.robots).length
     return(
       <div>
-        <h1>
-          Robot information
-        </h1>
+        <h3>
+          Robot simpleactions
+        </h3>
 
         <ButtonToolbar style={{marginBottom:"15px"}}>
           <ToggleButtonGroup type="radio" name="options" defaultValue={numRobots}>
