@@ -8,11 +8,10 @@ CORS(app)
 @app.route('/controller', methods = ['POST'])
 def make_controller():
     mission = request.get_json()
-    print(mission)
     for robot in mission:
         sequence = []
         for simpleaction in mission[robot]['simpleactions']:
-            if simpleaction['args'] is None:
+            if simpleaction['args'] is "":
                 sequence.append(simpleaction['name'] + "()")
             else:
                 sequence.append(simpleaction['name'] + "(" + simpleaction['args'] + ")")

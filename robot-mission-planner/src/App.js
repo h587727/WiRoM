@@ -1,26 +1,11 @@
 import React, {Component} from 'react';
 import data from './data';
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
-import arrayMove from 'array-move';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
-import {Button, Form, Dropdown, DropdownButton, Container, Col, Row, ListGroup, ListGroupItem, ToggleButton, ToggleButtonGroup, ButtonToolbar} from 'react-bootstrap';
-import { object } from 'prop-types';
+import {Button, Form, Dropdown, Container, Col, Row, ListGroup, ListGroupItem, ToggleButton, ToggleButtonGroup, ButtonToolbar} from 'react-bootstrap';
+import { ReactSortable } from "react-sortablejs";
 
-const SortableItem = SortableElement(({value}) => <li onClick={console.log(value)}>{value}</li>);
-
-const SortableList = SortableContainer(({items}) => {
-  return (
-    <ul>
-      {items.map((value, index) => (
-        <SortableItem key={`item-${value}`} index={index} value={value}/>
-      ))}
-    </ul>
-  );
-});
-
-// The forwardRef is important!!
-// Dropdown needs access to the DOM node in order to position the Menu
 const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
   <a
     href=""
@@ -35,8 +20,6 @@ const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
   </a>
 ));
 
-// forwardRef again here!
-// Dropdown needs access to the DOM of the Menu to measure it
 const CustomMenu = React.forwardRef(
   ({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
     const [value, setValue] = React.useState('');
@@ -71,9 +54,9 @@ class App extends Component {
     robots: data.robots,
     predefinedMissions: data.predefinedMissions,
     tasks: data.predefinedTasks,
-    showInfoForRobot: "mavic2pro",
-    selectedMission: "scoutLocationAndDeliverItem",
-    selectedTask: "scoutLocation",
+    showInfoForRobot: data.defaultShowInfoForRobot,
+    selectedMission: data.defaultSelectedMission,
+    selectedTask: data.defaultSelectedTask,
     availableSimpleactions: [],
     mission: {}
   }
@@ -86,7 +69,6 @@ class App extends Component {
   handleAvailableSimpleactionsChange = event => {
     let availableSimpleactions = []
     for (let r in this.state.robots) {
-      let i = 0
       for (let sa in this.state.robots[r].simpleactions) { 
         availableSimpleactions.push({"name":sa, "robot":r, "numArgs":sa.numArgs})
       }
@@ -95,12 +77,14 @@ class App extends Component {
   }
     
   handleMissionClick = name => event => {
-    this.setState({selectedMission: name});
+    let newSelectedTask = this.state.predefinedMissions[name][0].name
+    this.setState({selectedMission: name})
+    this.setState({selectedTask: newSelectedTask})
     this.handleMissionChange()
   }
 
   handleTaskClick = name => event => {
-    this.setState({selectedTask: name});
+    this.setState({selectedTask: name})
   }
 
   handleSimpleActionArgsChange = sa => event => {
@@ -133,7 +117,7 @@ class App extends Component {
     let mission = {}
 
     preMission.forEach(task => {
-      tasks[task].forEach(simpleaction => {
+      tasks[task.name].forEach(simpleaction => {
         let robot = simpleaction.robot
         let simpleactions = [simpleaction]
 
@@ -153,9 +137,8 @@ class App extends Component {
   handleAddNewTask = taskName => event => {
     let tasks = this.state.tasks
     let preMission = this.state.predefinedMissions
-    
     tasks[taskName] = []
-    preMission[this.state.selectedMission].push(taskName)
+    preMission[this.state.selectedMission].push({"name":taskName, "id":tasks.length})
     this.setState({tasks: tasks})
     this.setState({predefinedMissions: preMission})
     event.preventDefault()
@@ -167,9 +150,9 @@ class App extends Component {
     this.setState({tasks: tasks})
   }
 
-  handleRemoveTask = taskName => event => {
+  handleRemoveTask = task => event => {
     let preMission = this.state.predefinedMissions[this.state.selectedMission]
-    preMission.splice(preMission.indexOf(taskName), 1)
+    preMission.splice(preMission.indexOf(task), 1)
     this.setState({preMission: preMission})
   }
 
@@ -179,16 +162,23 @@ class App extends Component {
     this.setState({task: task})
   }
 
-  print = event => {
-    console.log("Test")
+  handleSimpleactionSortable = newState => {
+    let tasks = this.state.tasks
+    tasks[this.state.selectedTask] = newState
+    this.setState({tasks: tasks})
+  }
+
+  handleTaskSortable = newState => {
+    let preMissions = this.state.predefinedMissions
+    preMissions[this.state.selectedMission] = newState
+    this.setState({predefinedMissions: preMissions})
   }
 
   render () {
     return (
       <Container fluid>
-        
-        <div class="shadow p-3 mb-5 bg-white rounded">
-          <div class="shadow p-3 mb-5 bg-white rounded">
+        <div className="shadow p-3 mb-5 bg-white rounded">
+          <div className="shadow p-3 mb-5 bg-white rounded">
             <Row>
               <Mission 
                 state={this.state} 
@@ -198,9 +188,13 @@ class App extends Component {
           </div>
           
           <Row style={{marginBottom:"15px"}}>
-            <Col>
+            <Col xs={4}>
               <div class="shadow p-3 mb-5 bg-white rounded">
-                <Task state={this.state} handleTaskClick={(mission) => this.handleTaskClick(mission)} handleRemoveTask={(task) => this.handleRemoveTask(task)}>
+                <Task 
+                  state={this.state} 
+                  handleTaskClick={(mission) => this.handleTaskClick(mission)} 
+                  handleRemoveTask={(task) => this.handleRemoveTask(task)}
+                  handleTaskSortable={(newState) => this.handleTaskSortable(newState)}>
                 </Task>
 
                 <NewTask state = {this.state} handleAddNewTask={(taskName) => this.handleAddNewTask(taskName)} print={() => this.print()}>
@@ -208,13 +202,14 @@ class App extends Component {
               </div>
             </Col>
 
-            <Col xs={6}>
+            <Col xs={5}>
               <div class="shadow p-3 mb-5 bg-white rounded">
                 <Simpleactions 
                   state={this.state} 
                   handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
                   handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}
-                  handleRemoveSimpleaction={(sa) => this.handleRemoveSimpleaction(sa)}>
+                  handleRemoveSimpleaction={(sa) => this.handleRemoveSimpleaction(sa)}
+                  handleSimpleactionSortable={(newState) => this.handleSimpleactionSortable(newState)}>
 
                 </Simpleactions>
                 
@@ -229,7 +224,7 @@ class App extends Component {
                 </Dropdown>
               </div>
             </Col>
-            <Col>
+            <Col xs={3}>
               <div class="shadow p-3 mb-5 bg-white rounded">
                 <Robot state={this.state}>
                 </Robot>
@@ -266,66 +261,57 @@ class Mission extends Component {
   }
 }
 
-class SortableComponent extends Component {
-  componentWillReceiveProps(nextProps) {
-    this.setState({items: nextProps.state.predefinedMissions[nextProps.state.selectedMission]});  
-  }
-
-  state = {items: this.props.state.predefinedMissions[this.props.state.selectedMission]}
-  onSortEnd = ({oldIndex, newIndex}) => {
-    this.setState(({items}) => ({
-      items: arrayMove(items, oldIndex, newIndex),
-    }));
-    console.log(this.state.items)
-    
-  };
-
-  render() {
-    return <SortableList items={this.state.items} onSortEnd={this.onSortEnd}/>;
-  }
-}
-
 class Task extends Component {
   componentWillReceiveProps(nextProps) {
-    this.setState({missions: nextProps.state.predefinedMissions, selectedMission: nextProps.state.selectedMission});  
+    this.setState({
+      list: nextProps.state.predefinedMissions[nextProps.state.selectedMission]});  
   }
-  state = {missions: this.props.state.predefinedMissions, selectedMission: this.props.state.selectedMission}
+  state = {
+    list: this.props.state.predefinedMissions[this.props.state.selectedMission]
+  }
   
   render(){
-    let numTasks = Object.keys(this.state.missions[this.state.selectedMission]).length
     return(
       <div>
         <h3>
           Tasks
         </h3>
-        <ButtonToolbar>
-          <Row>
-            <Col>
-          <ToggleButtonGroup type="radio" name="options" defaultValue={numTasks} vertical>
-            {this.state.missions[this.state.selectedMission].map(t => (
-              <ToggleButton value={numTasks--} variant="outline-dark" style={{display:"block"}} onClick={this.props.handleTaskClick(t)}> {t}  
-              </ToggleButton> 
-            ))}
-            </ToggleButtonGroup>
-            </Col>
-            <Col>
-            {this.state.missions[this.state.selectedMission].map(t => (
-              <Row>
-              <Button style={{marginLeft:"15px"}}onClick={this.props.handleRemoveTask(t)} variant="outline-dark">
-                X
-              </Button>
-              </Row>
-            ))}
-           </Col>
-          </Row>
-        </ButtonToolbar>
+       
+            <ReactSortable
+              list={this.state.list}
+              setList={newState => this.props.handleTaskSortable(newState)}
+            >
+              {this.state.list.map(task => (
+                <div style={{display:"flex"}}>
+                  <Button
+                    variant={task.name === this.props.state.selectedTask ? "dark" : "outline-dark"} 
+                    style={{display:"block"}} 
+                    onClick={this.props.handleTaskClick(task.name)}
+                  > 
+                    {task.name}  
+                  </Button> 
+
+                  <Button 
+                    style={{marginLeft:"5px"}}
+                    onClick={this.props.handleRemoveTask(task)} 
+                    variant="outline-dark"
+                    >
+                    X
+                  </Button>
+                </div>
+              ))}
+            </ReactSortable>
+
+
       </div>);
   }
 }
 
 class Simpleactions extends Component {
   componentWillReceiveProps(nextProps) {
-    this.setState({robots: nextProps.state.robots, tasks: nextProps.state.tasks, selectedTask: nextProps.state.selectedTask});  
+    this.setState({
+      robots: nextProps.state.robots,
+      list: nextProps.state.tasks[nextProps.state.selectedTask]});  
   }
 
   findRobotsWithSimpleaction(sa) {
@@ -337,41 +323,40 @@ class Simpleactions extends Component {
     return select
   }
 
-  renderSimpleAction(sa) {    
-    let simpleaction = sa.name;
-    let args = sa.args;
-    return (
-        <ListGroup horizontal>
-          <ListGroupItem style={{minWidth:"250px"}}>
-            {simpleaction} 
-          </ListGroupItem>
-          <Form>
-            <Form.Control as="input" style={{ marginLeft:"5px"}}
-              value={args}
-              onChange={this.props.handleSimpleActionArgsChange(sa)}>
-            </Form.Control>
-          </Form>
-
-          <Form>
-            <Form.Control as="select" value={sa["robot"]} onChange={this.props.handleSimpleActionRobotChange(sa)} style={{marginLeft:"10px"}}>
-              {this.findRobotsWithSimpleaction(simpleaction)})}
-            </Form.Control>
-          </Form>
-
-          <Button style={{marginLeft:"15px"}}onClick={this.props.handleRemoveSimpleaction(sa)} variant="outline-dark">
-            X
-          </Button>
-        </ListGroup>);
-  }
-
-  state = {robots: this.props.state.robots, tasks: this.props.state.tasks, selectedTask: this.props.state.selectedTask}
+  state = {robots: this.props.state.robots, list: this.props.state.tasks[this.props.state.selectedTask]}
   render(){
-    console.log(this.state.tasks, this.state.selectedTask)
     return(
       <div style={{ marginBottom:"15px"}}>
         <h3>Simpleactions</h3>
 
-        {this.state.tasks[this.state.selectedTask].map(sa => this.renderSimpleAction(sa))}
+        <ReactSortable
+          list={this.state.list}
+          setList={newState => this.props.handleSimpleactionSortable(newState)}
+        >
+        {this.state.list.map(sa => (
+            <ListGroup horizontal>
+              <ListGroupItem style={{width:"200px", overflow:"scroll"}}>
+                {sa.name} 
+              </ListGroupItem>
+              <Form>
+                <Form.Control as="input" style={{marginLeft:"5px", width:"120px", overflow:"scroll"}}
+                  value={sa.args}
+                  onChange={this.props.handleSimpleActionArgsChange(sa)}>
+                </Form.Control>
+              </Form>
+
+              <Form>
+                <Form.Control as="select" value={sa["robot"]} onChange={this.props.handleSimpleActionRobotChange(sa)} style={{marginLeft:"10px"}}>
+                  {this.findRobotsWithSimpleaction(sa.name)})}
+                </Form.Control>
+              </Form>
+
+              <Button style={{marginLeft:"15px"}}onClick={this.props.handleRemoveSimpleaction(sa)} variant="outline-dark">
+                X
+              </Button>
+            </ListGroup>
+        ))}
+        </ReactSortable>
       </div>);
   }
 
@@ -400,7 +385,7 @@ class Robot extends Component {
             </ToggleButtonGroup>
         </ButtonToolbar>
       
-        <ListGroup style={{marginBottom:"15px"}}>
+        <ListGroup style={{overflow:"scroll", height:"315px"}}>
           <ListGroupItem>
             Language: {this.state.robots[this.state.showInfoForRobot].language}
           </ListGroupItem>
@@ -424,14 +409,14 @@ class NewTask extends Component {
 
   render() { 
     return(
-    <Form onSubmit={this.props.handleAddNewTask(this.state.taskName)}>
+    <Form style={{marginTop:"15px"}}onSubmit={this.props.handleAddNewTask(this.state.taskName)}>
       <Form.Group>
         <Form.Control onChange={this.handleNameChange} required placeholder="Task name" type="input"/>
-      </Form.Group>
 
-      <Button type="submit" variant="outline-dark" style={{marginTop:"10px"}}>
-        Add new task
-      </Button>
+        <Button type="submit" variant="outline-dark" style={{marginTop:"5px"}}>
+          Add new task
+        </Button>
+      </Form.Group>
     </Form>
     )
   }
