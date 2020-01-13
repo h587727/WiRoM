@@ -3,31 +3,31 @@
         "mavic2pro": {
             "language" : "python",
             "port" : "5001",
-            "simpleactions": {
-                "set_altitude": {"numArgs": 1, "type":"move"},
-                "go_forward": {"numArgs": 1, "type":"move"},
-                "go_backward": {"numArgs": 1, "type":"move"},
-                "turn_right": {"numArgs": 1, "type":"move"},
-                "turn_left": {"numArgs": 1, "type":"move"},
-                "recognise_objects": {"numArgs": 0, "type":"set_property"},
-                "go_to_location": {"numArgs": 1, "type":"move"},
-                "set_message_target": {"numArgs": 1, "type":"set_property"},
-                "send_location": {"numArgs":0, "type":"notify"},
-                "stop_movement": {"numArgs": 0, "type":"move"}
-            }
+            "simpleactions": [
+                {"name":"set_altitude", "numArgs": 1, "type":"move"},
+                {"name":"go_forward", "numArgs": 1, "type":"move"},
+                {"name":"go_backward", "numArgs": 1, "type":"move"},
+                {"name":"turn_right", "numArgs": 1, "type":"move"},
+                {"name":"turn_left", "numArgs": 1, "type":"move"},
+                {"name":"recognise_objects", "numArgs": 0, "type":"set_property"},
+                {"name":"go_to_location", "numArgs": 1, "type":"move"},
+                {"name":"set_message_target", "numArgs": 1, "type":"set_property"},
+                {"name":"send_location", "numArgs":0, "type":"notify"},
+                {"name":"stop_movement", "numArgs": 0, "type":"move"}
+            ]
         },
         "moose": {
             "language" : "python",
             "port" : "5002",
-            "simpleactions": {
-                "go_forward": {"numArgs": 1, "type":"move"},
-                "go_backward": {"numArgs": 1, "type":"move"},
-                "turn_right": {"numArgs": 1, "type":"move"},
-                "turn_left": {"numArgs": 1, "type":"move"},
-                "go_to_location": {"numArgs": 1, "type":"move"},
-                "stop_movement": {"numArgs": 0, "type":"move"},
-                "receive_location_from_robot":{"numArgs":0 , "type":"wait"}
-            }
+            "simpleactions": [
+                {"name":"go_forward", "numArgs": 1, "type":"move"},
+                {"name":"go_backward", "numArgs": 1, "type":"move"},
+                {"name":"turn_right", "numArgs": 1, "type":"move"},
+                {"name":"turn_left", "numArgs": 1, "type":"move"},
+                {"name":"go_to_location", "numArgs": 1, "type":"move"},
+                {"name":"stop_movement", "numArgs": 0, "type":"move"},
+                {"name":"receive_location_from_robot", "numArgs":0 , "type":"wait"}
+            ]
         }
     },
     "predefinedTasks": {
@@ -69,12 +69,10 @@
         ]
     },                
     "mission": {
-        "robots" : [
-        {
-            "name" : "mavic2pro",
+        "mavic2pro" : {
             "language" : "python",
             "port" : "5001",
-            "actions" : [
+            "simpleactions" : [
             "set_altitude(1)", 
             "recognise_objects()", 
             "set_message_target('moose')", 
@@ -82,17 +80,16 @@
             "turn_left(4)", 
             "go_forward(4)"
             ]
-        },
-        {
-            "name" : "moose",
+        }
+        ,
+        "moose": {
             "language" : "python",
             "port" : "5002",
-            "actions" : [
+            "simpleactions" : [
             "receive_location_from_robot()",
             "go_to_location([])"
             ]
         }
-        ]
     },
     "defaultShowInfoForRobot": "mavic2pro",                
     "defaultSelectedMission": "scoutLocationAndDeliverItem",   

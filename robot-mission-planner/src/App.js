@@ -67,10 +67,11 @@ class App extends Component {
 
   handleAvailableSimpleactionsChange = event => {
     let availableSimpleactions = []
-    for (let r in this.state.robots) {
-      for (let sa in this.state.robots[r].simpleactions) {
-        availableSimpleactions.push({ "name": sa, "robot": r, "numArgs": sa.numArgs })
-      }
+
+    for (let robot in this.state.robots) {
+      this.state.robots[robot].simpleactions.forEach(sa => {
+        availableSimpleactions.push({ "name": sa.name, "robot": robot, "numArgs": sa.numArgs })
+      })
     }
     this.setState({ availableSimpleactions: availableSimpleactions })
   }
@@ -135,6 +136,7 @@ class App extends Component {
     })
     this.setState({ tasks: tasks })
     this.setState({ mission: mission })
+    console.log(this.state)
   }
 
   handleAddNewTask = taskName => event => {
@@ -185,6 +187,14 @@ class App extends Component {
 
   handleSimpleactionSortable = newState => {
     let tasks = this.state.tasks
+    if (newState > tasks[this.state.selectedTask]) {
+      newState.forEach(sa => {
+        if (!tasks[this.state.selectedTask].includes(sa)) {
+          newState[newState.indexOf(sa)] = { "name": sa.name, "args": "", "robot": this.state.showInfoForRobot, "id": (newState.length - 1) }
+        }
+      })
+    }
+
     tasks[this.state.selectedTask] = newState
     this.setState({ tasks: tasks })
     this.handleMissionChange()
@@ -241,13 +251,13 @@ class App extends Component {
                       handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
                       handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}
                       handleRemoveSimpleaction={(sa) => this.handleRemoveSimpleaction(sa)}
-                      handleSimpleactionSortable={(newState) => this.handleSimpleactionSortable(newState)}>
-
+                      handleSimpleactionSortable={(newState) => this.handleSimpleactionSortable(newState)}
+                    >
                     </Simpleactions>
 
                     <Dropdown>
-                      <Dropdown.Toggle id="dropdown-custom-components" as={CustomToggle} title="Add new simpleaction">
-                        Add new simpleaction
+                      <Dropdown.Toggle id="dropdown-custom-components" as={CustomToggle} title="Search for simpleaction">
+                        Search for simpleaction
                       </Dropdown.Toggle>
 
                       <Dropdown.Menu as={CustomMenu}>
@@ -320,6 +330,7 @@ class Task extends Component {
           list={this.state.list}
           setList={newState => this.props.handleTaskSortable(newState)}
           animation={150}
+          group="shared"
         >
           {this.state.list.map(task => (
             <div style={{ display: "flex" }}>
@@ -356,11 +367,34 @@ class Simpleactions extends Component {
 
   findRobotsWithSimpleaction(sa) {
     let select = []
-    for (let robot in this.state.robots) {
-      if (sa in this.state.robots[robot].simpleactions)
-        select.push(<option> {robot} </option>)
-    }
+    let robots = this.state.robots
+    Object.keys(robots).forEach(robot => {
+      robots[robot].simpleactions.forEach(simpleaction => {
+        if (sa.name === simpleaction.name)
+          select.push(<option> {robot} </option>)
+      })
+    })
     return select
+  }
+
+  printNumSequence(sa) {
+    let num = (sa.id + 1)
+    this.state.robots[sa.robot].simpleactions.forEach(simpleaction => {
+      if (simpleaction.name === sa.name)
+        if (simpleaction.type === "notify" || simpleaction.type === "wait")
+          num = (sa.id + 1) + "*"
+    })
+    return num
+  }
+
+  simpleactionNoArguments(sa) {
+    let noArgs = false
+    this.state.robots[sa.robot].simpleactions.forEach(simpleaction => {
+      if (sa.name === simpleaction.name)
+        if (simpleaction.numArgs === 0)
+          noArgs = true
+    })
+    return noArgs
   }
 
   state = {
@@ -376,29 +410,23 @@ class Simpleactions extends Component {
       <div style={{ marginBottom: "15px" }}>
         <h3>Simpleactions</h3>
         {
-
           <ReactSortable
             list={this.state.list}
             setList={newState => this.props.handleSimpleactionSortable(newState)}
             animation={150}
+            group="shared"
           >
             {this.state.list.map(sa => (
               <ListGroup horizontal>
                 <div style={{ minWidth: "25px", marginTop: "5px", border: "" }}>
-                  {
-                    (this.state.robots[sa.robot].simpleactions[sa.name].type === "notify" ||
-                      this.state.robots[sa.robot].simpleactions[sa.name].type === "wait") ?
-                      (sa.id + 1) + "*" : (sa.id + 1)
-                  }
+                  {this.printNumSequence(sa)}
                 </div>
 
                 <ListGroupItem style={{ width: "225px", overflow: "scroll" }}>
                   {sa.name}
                 </ListGroupItem>
-
                 <Form>
-                  {this.state.robots[sa.robot].simpleactions[sa.name].numArgs === 0
-                    ?
+                  {this.simpleactionNoArguments(sa) ?
                     <Form.Control as="input" disabled style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
                       value={sa.args}
                       onChange={this.props.handleSimpleActionArgsChange(sa)}>
@@ -417,8 +445,8 @@ class Simpleactions extends Component {
                     value={sa.robot}
                     onChange={this.props.handleSimpleActionRobotChange(sa)}
                     style={{ marginLeft: "5px", width: "120px" }}>
-                    {this.findRobotsWithSimpleaction(sa.name)})}
-                </Form.Control>
+                    {this.findRobotsWithSimpleaction(sa)})}
+                  </Form.Control>
                 </Form>
 
                 <Button style={{ marginLeft: "5px" }} onClick={this.props.handleRemoveSimpleaction(sa)} variant="outline-dark">
@@ -434,10 +462,14 @@ class Simpleactions extends Component {
 }
 
 class Robot extends Component {
-  state = { robots: this.props.state.robots, showInfoForRobot: this.props.state.showInfoForRobot }
+  state = {
+    robots: this.props.state.robots,
+    showInfoForRobot: this.props.state.showInfoForRobot,
+    list: this.props.state.robots[this.props.state.showInfoForRobot].simpleactions
+  }
 
   handleRobotClick = name => event => {
-    this.setState({ showInfoForRobot: name });
+    this.setState({ showInfoForRobot: name, list: this.state.robots[name].simpleactions });
   }
 
   render() {
@@ -465,9 +497,14 @@ class Robot extends Component {
             Port: {this.state.robots[this.state.showInfoForRobot].port}
           </ListGroupItem>
 
-          <div>
-            {Object.keys(this.state.robots[this.state.showInfoForRobot].simpleactions).map(sa => <ListGroupItem>{sa}</ListGroupItem>)}
-          </div>
+          <ReactSortable
+            list={this.state.list}
+            setList={newState => this.setState({ list: newState })}
+            sort={false}
+            group={{ name: 'shared', pull: 'clone', put: false }}
+          >
+            {this.state.list.map(sa => <ListGroupItem>{sa.name}</ListGroupItem>)}
+          </ReactSortable>
         </ListGroup>
       </div>);
   }
