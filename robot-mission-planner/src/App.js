@@ -76,7 +76,10 @@ class App extends Component {
   }
 
   handleMissionClick = name => event => {
-    let newSelectedTask = this.state.predefinedMissions[name][0].name
+    let newSelectedTask = ""
+    if (this.state.predefinedMissions[name].length > 0)
+      newSelectedTask = this.state.predefinedMissions[name][0].name
+
     this.setState({ selectedMission: name })
     this.setState({ selectedTask: newSelectedTask })
     this.handleMissionChange()
@@ -139,9 +142,12 @@ class App extends Component {
     let preMission = this.state.predefinedMissions
     tasks[taskName] = []
     preMission[this.state.selectedMission].push({ "name": taskName, "id": tasks.length })
+
+    this.setState({ selectedTask: taskName })
     this.setState({ tasks: tasks })
     this.setState({ predefinedMissions: preMission })
     event.preventDefault()
+    event.target.reset()
     this.handleMissionChange()
   }
 
@@ -149,6 +155,17 @@ class App extends Component {
     let tasks = this.state.tasks
     tasks[this.state.selectedTask].push({ "name": sa.name, "args": "", "robot": sa.robot })
     this.setState({ tasks: tasks })
+    this.handleMissionChange()
+  }
+
+  handleAddNewMission = missionName => event => {
+    let preMission = this.state.predefinedMissions
+    preMission[missionName] = []
+    event.preventDefault()
+    event.target.reset();
+    this.setState({ predefinedMissions: preMission })
+    this.setState({ selectedMission: missionName })
+    this.setState({ selectedTask: "" })
     this.handleMissionChange()
   }
 
@@ -188,8 +205,15 @@ class App extends Component {
             <Row>
               <Mission
                 state={this.state}
-                handleMissionClick={(mission) => this.handleMissionClick(mission)}>
+                handleMissionClick={(mission) => this.handleMissionClick(mission)}
+              >
               </Mission>
+
+              <NewMission
+                state={this.state}
+                handleAddNewMission={(missionName) => this.handleAddNewMission(missionName)}
+              >
+              </NewMission>
             </Row>
           </div>
 
@@ -209,26 +233,29 @@ class App extends Component {
             </Col>
 
             <Col xs={6}>
-              <div className="shadow p-3 mb-5 bg-white rounded">
-                <Simpleactions
-                  state={this.state}
-                  handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
-                  handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}
-                  handleRemoveSimpleaction={(sa) => this.handleRemoveSimpleaction(sa)}
-                  handleSimpleactionSortable={(newState) => this.handleSimpleactionSortable(newState)}>
+              {
+                this.state.selectedTask === "" ? <div></div> :
+                  <div className="shadow p-3 mb-5 bg-white rounded">
+                    <Simpleactions
+                      state={this.state}
+                      handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
+                      handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}
+                      handleRemoveSimpleaction={(sa) => this.handleRemoveSimpleaction(sa)}
+                      handleSimpleactionSortable={(newState) => this.handleSimpleactionSortable(newState)}>
 
-                </Simpleactions>
+                    </Simpleactions>
 
-                <Dropdown>
-                  <Dropdown.Toggle id="dropdown-custom-components" as={CustomToggle} title="Add new simpleaction">
-                    Add new simpleaction
-                  </Dropdown.Toggle>
+                    <Dropdown>
+                      <Dropdown.Toggle id="dropdown-custom-components" as={CustomToggle} title="Add new simpleaction">
+                        Add new simpleaction
+                      </Dropdown.Toggle>
 
-                  <Dropdown.Menu as={CustomMenu}>
-                    {this.state.availableSimpleactions.map(sa => <Dropdown.Item onClick={this.handleAddNewSimpleaction(sa)}> {sa.name} ({sa.robot}) </Dropdown.Item>)}
-                  </Dropdown.Menu>
-                </Dropdown>
-              </div>
+                      <Dropdown.Menu as={CustomMenu}>
+                        {this.state.availableSimpleactions.map(sa => <Dropdown.Item onClick={this.handleAddNewSimpleaction(sa)}> {sa.name} ({sa.robot}) </Dropdown.Item>)}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </div>
+              }
             </Col>
             <Col xs={3}>
               <div className="shadow p-3 mb-5 bg-white rounded">
@@ -258,8 +285,13 @@ class Mission extends Component {
 
         <ButtonToolbar>
           <ToggleButtonGroup type="radio" name="options" defaultValue={numMissions}>
-            {Object.keys(this.state.predefinedMissions).map(m => (
-              <ToggleButton value={numMissions--} variant="outline-dark" style={{ marginBottom: 15 }} onClick={this.props.handleMissionClick(m)}>{m}</ToggleButton>
+            {Object.keys(this.state.predefinedMissions).map(mission => (
+              <ToggleButton
+                variant={mission === this.props.state.selectedMission ? "dark" : "outline-dark"}
+                style={{ marginBottom: 15 }}
+                onClick={this.props.handleMissionClick(mission)}>
+                {mission}
+              </ToggleButton>
             ))}
           </ToggleButtonGroup>
         </ButtonToolbar>
@@ -293,7 +325,7 @@ class Task extends Component {
             <div style={{ display: "flex" }}>
               <Button
                 variant={task.name === this.props.state.selectedTask ? "dark" : "outline-dark"}
-                style={{ display: "block" }}
+                style={{ display: "block", width: "100%", overflow: "scroll" }}
                 onClick={this.props.handleTaskClick(task.name)}
               >
                 {task.name}
@@ -335,57 +367,67 @@ class Simpleactions extends Component {
     robots: this.props.state.robots,
     list: this.props.state.tasks[this.props.state.selectedTask]
   }
+
   render() {
+    if (this.state.list === undefined)
+      return (<h3>Simpleactions</h3>)
+
     return (
       <div style={{ marginBottom: "15px" }}>
         <h3>Simpleactions</h3>
+        {
 
-        <ReactSortable
-          list={this.state.list}
-          setList={newState => this.props.handleSimpleactionSortable(newState)}
-          animation={150}
-        >
-          {this.state.list.map(sa => (
-            <ListGroup horizontal>
-              <div style={{ minWidth: "25px", marginTop: "5px" }}>
-                {
-                  (this.state.robots[sa.robot].simpleactions[sa.name].type === "notify" ||
-                    this.state.robots[sa.robot].simpleactions[sa.name].type === "wait") ?
-                    (sa.id + 1) + "*" : (sa.id + 1)
-                }
-              </div>
+          <ReactSortable
+            list={this.state.list}
+            setList={newState => this.props.handleSimpleactionSortable(newState)}
+            animation={150}
+          >
+            {this.state.list.map(sa => (
+              <ListGroup horizontal>
+                <div style={{ minWidth: "25px", marginTop: "5px", border: "" }}>
+                  {
+                    (this.state.robots[sa.robot].simpleactions[sa.name].type === "notify" ||
+                      this.state.robots[sa.robot].simpleactions[sa.name].type === "wait") ?
+                      (sa.id + 1) + "*" : (sa.id + 1)
+                  }
+                </div>
 
-              <ListGroupItem style={{ width: "200px", overflow: "scroll" }}>
-                {sa.name}
-              </ListGroupItem>
+                <ListGroupItem style={{ width: "225px", overflow: "scroll" }}>
+                  {sa.name}
+                </ListGroupItem>
 
-              <Form>
-                {this.state.robots[sa.robot].simpleactions[sa.name].numArgs === 0
-                  ?
-                  <Form.Control as="input" disabled style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
-                    value={sa.args}
-                    onChange={this.props.handleSimpleActionArgsChange(sa)}>
-                  </Form.Control>
-                  :
-                  <Form.Control as="input" style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
-                    value={sa.args}
-                    onChange={this.props.handleSimpleActionArgsChange(sa)}>
-                  </Form.Control>
-                }
-              </Form>
+                <Form>
+                  {this.state.robots[sa.robot].simpleactions[sa.name].numArgs === 0
+                    ?
+                    <Form.Control as="input" disabled style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
+                      value={sa.args}
+                      onChange={this.props.handleSimpleActionArgsChange(sa)}>
+                    </Form.Control>
+                    :
+                    <Form.Control as="input" style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
+                      value={sa.args}
+                      onChange={this.props.handleSimpleActionArgsChange(sa)}>
+                    </Form.Control>
+                  }
+                </Form>
 
-              <Form>
-                <Form.Control as="select" value={sa.robot} onChange={this.props.handleSimpleActionRobotChange(sa)} style={{ marginLeft: "10px" }}>
-                  {this.findRobotsWithSimpleaction(sa.name)})}
+                <Form>
+                  <Form.Control
+                    as="select"
+                    value={sa.robot}
+                    onChange={this.props.handleSimpleActionRobotChange(sa)}
+                    style={{ marginLeft: "5px", width: "120px" }}>
+                    {this.findRobotsWithSimpleaction(sa.name)})}
                 </Form.Control>
-              </Form>
+                </Form>
 
-              <Button style={{ marginLeft: "15px" }} onClick={this.props.handleRemoveSimpleaction(sa)} variant="outline-dark">
-                X
+                <Button style={{ marginLeft: "5px" }} onClick={this.props.handleRemoveSimpleaction(sa)} variant="outline-dark">
+                  X
               </Button>
-            </ListGroup>
-          ))}
-        </ReactSortable>
+              </ListGroup>
+            ))}
+          </ReactSortable>
+        }
       </div>);
   }
 
@@ -441,12 +483,35 @@ class NewTask extends Component {
 
   render() {
     return (
-      <Form style={{ marginTop: "15px" }} onSubmit={this.props.handleAddNewTask(this.state.taskName)}>
+      <Form inline style={{ marginTop: "15px" }} onSubmit={this.props.handleAddNewTask(this.state.taskName)}>
         <Form.Group>
-          <Form.Control onChange={this.handleNameChange} required placeholder="Task name" type="input" />
+          <Form.Control style={{ width: "165px" }} onChange={this.handleNameChange} required placeholder="Task name" type="input" />
 
-          <Button type="submit" variant="outline-dark" style={{ marginTop: "5px" }}>
+          <Button type="submit" variant="outline-dark">
             Add new task
+          </Button>
+        </Form.Group>
+      </Form>
+    )
+  }
+}
+
+class NewMission extends Component {
+  state = this.props.state
+
+  handleNameChange = event => {
+    let missionName = event.target.value
+    this.setState({ missionName: missionName })
+  }
+
+  render() {
+    return (
+      <Form inline style={{ marginTop: "40px", marginLeft: "10px" }} onSubmit={this.props.handleAddNewMission(this.state.missionName)}>
+        <Form.Group >
+          <Form.Control onChange={this.handleNameChange} required placeholder="Mission name" type="input" />
+
+          <Button type="submit" variant="outline-dark" style={{}}>
+            Add new mission
           </Button>
         </Form.Group>
       </Form>
