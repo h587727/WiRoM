@@ -31,12 +31,12 @@
         }
     },
     "predefinedTasks": {
-        "scoutLocation": [
+        "Scout location": [
             {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":"0"}, 
             {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":"1"}, 
             {"name":"go_to_location", "args":"[388, -365]", "robot":"mavic2pro", "id":"2"}
         ],
-        "scoutArea": [
+        "Scout area": [
             {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":"0"}, 
             {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":"1"}, 
             {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"2"},
@@ -47,25 +47,25 @@
             {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":"7"},
             {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"8"}
         ],
-        "sendMessage": [
+        "Send message": [
             {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":"0"}, 
             {"name":"send_location", "args":"", "robot":"mavic2pro", "id":"1"}
         ],
-        "receiveAndGoToLocation": [
+        "Receive and go to location": [
             {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":"0"}, 
             {"name":"go_to_location", "args":"[]", "robot":"moose", "id":"1"}
         ]
     },
     "predefinedMissions": {
-        "scoutLocationAndDeliverItem": [
-            {"name":"scoutLocation", "id": "0"},
-            {"name":"sendMessage", "id": "1"},
-            {"name":"receiveAndGoToLocation", "id": "2"}
+        "Scout location and deliver item": [
+            {"name":"Scout location", "id": "0"},
+            {"name":"Send message", "id": "1"},
+            {"name":"Receive and go to location", "id": "2"}
         ],
-        "scoutAreaAndDeliverItem": [
-            {"name":"scoutArea", "id": "0"},
-            {"name":"sendMessage", "id": "1"},
-            {"name":"receiveAndGoToLocation", "id": "2"}
+        "Scout area and deliver item": [
+            {"name":"Scout area", "id": "0"},
+            {"name":"Send message", "id": "1"},
+            {"name":"Receive and go to location", "id": "2"}
         ]
     },                
     "mission": {
@@ -92,6 +92,6 @@
         }
     },
     "defaultShowInfoForRobot": "mavic2pro",                
-    "defaultSelectedMission": "scoutLocationAndDeliverItem",   
-    "defaultSelectedTask": "scoutLocation"         
+    "defaultSelectedMission": "Scout location and deliver item",   
+    "defaultSelectedTask": "Scout location"         
 }

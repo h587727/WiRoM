@@ -1,8 +1,11 @@
 html, body {
   margin: 0;
   padding-left:10px;
+  padding-right:10px;
   height: 100%;
   overflow: scroll;
+  background: rgb(126,17,195);
+  background: linear-gradient(37deg, rgba(126,17,195,1) 16%, rgba(207,4,4,1) 100%);
 }
 
 body {

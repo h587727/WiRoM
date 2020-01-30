@@ -17,15 +17,12 @@ timestep = int(robot.getBasicTimeStep())
 
 left_motor_names = ["left motor 1",  "left motor 2",  "left motor 3",  "left motor 4"] 
 right_motor_names = ["right motor 1", "right motor 2", "right motor 3", "right motor 4"]
-left_motors = []
-right_motors = []
+left_motors = [robot.getMotor(name) for name in left_motor_names]
+right_motors = [robot.getMotor(name) for name in right_motor_names]
 left_speed = 0
 right_speed = 0 
 
-for name in left_motor_names:
-    left_motors.append(robot.getMotor(name))
-for name in right_motor_names:
-    right_motors.append(robot.getMotor(name))
+
 
 gps = robot.getGPS('gps')
 compass = robot.getCompass('compass')

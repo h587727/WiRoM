@@ -210,75 +210,81 @@ class App extends Component {
   render() {
     return (
       <Container fluid>
-        <div className="shadow p-3 mb-5 bg-white rounded">
-          <div className="shadow p-3 mb-5 bg-white rounded">
-            <Row>
-              <Mission
-                state={this.state}
-                handleMissionClick={(mission) => this.handleMissionClick(mission)}
-              >
-              </Mission>
-
-              <NewMission
-                state={this.state}
-                handleAddNewMission={(missionName) => this.handleAddNewMission(missionName)}
-              >
-              </NewMission>
-            </Row>
-          </div>
-
-          <Row style={{ marginBottom: "15px" }}>
-            <Col xs={3}>
+        <Row style={{marginTop:"30px"}}>
+          <Col xs="9">
+            <div className="shadow p-3 mb-5 rounded" style={{backgroundColor:"#f2f2f2"}}>
               <div className="shadow p-3 mb-5 bg-white rounded">
-                <Task
-                  state={this.state}
-                  handleTaskClick={(mission) => this.handleTaskClick(mission)}
-                  handleRemoveTask={(task) => this.handleRemoveTask(task)}
-                  handleTaskSortable={(newState) => this.handleTaskSortable(newState)}>
-                </Task>
+                <Row>
+                  <Mission
+                    state={this.state}
+                    handleMissionClick={(mission) => this.handleMissionClick(mission)}
+                  >
+                  </Mission>
 
-                <NewTask state={this.state} handleAddNewTask={(taskName) => this.handleAddNewTask(taskName)} print={() => this.print()}>
-                </NewTask>
+                  <NewMission
+                    state={this.state}
+                    handleAddNewMission={(missionName) => this.handleAddNewMission(missionName)}
+                  >
+                  </NewMission>
+                  </Row>
               </div>
-            </Col>
 
-            <Col xs={6}>
-              {
-                this.state.selectedTask === "" ? <div></div> :
+              <Row style={{ marginBottom: "15px" }}>
+                <Col xs={4}>
                   <div className="shadow p-3 mb-5 bg-white rounded">
-                    <Simpleactions
+                    <Task
                       state={this.state}
-                      handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
-                      handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}
-                      handleRemoveSimpleaction={(sa) => this.handleRemoveSimpleaction(sa)}
-                      handleSimpleactionSortable={(newState) => this.handleSimpleactionSortable(newState)}
-                    >
-                    </Simpleactions>
+                      handleTaskClick={(mission) => this.handleTaskClick(mission)}
+                      handleRemoveTask={(task) => this.handleRemoveTask(task)}
+                      handleTaskSortable={(newState) => this.handleTaskSortable(newState)}>
+                    </Task>
 
-                    <Dropdown>
-                      <Dropdown.Toggle id="dropdown-custom-components" as={CustomToggle} title="Search for simpleaction">
-                        Search for simpleaction
-                      </Dropdown.Toggle>
-
-                      <Dropdown.Menu as={CustomMenu}>
-                        {this.state.availableSimpleactions.map(sa => <Dropdown.Item onClick={this.handleAddNewSimpleaction(sa)}> {sa.name} ({sa.robot}) </Dropdown.Item>)}
-                      </Dropdown.Menu>
-                    </Dropdown>
+                    <NewTask state={this.state} handleAddNewTask={(taskName) => this.handleAddNewTask(taskName)} print={() => this.print()}>
+                    </NewTask>
                   </div>
-              }
-            </Col>
-            <Col xs={3}>
-              <div className="shadow p-3 mb-5 bg-white rounded">
-                <Robot state={this.state}>
-                </Robot>
-              </div>
-            </Col>
-          </Row>
+                </Col>
 
-          <Button type="submit" style={{ marginBottom: "15px" }} variant="dark" onClick={this.handleSubmit}>
-            Send mission
-          </Button>
-        </div>
+                <Col xs={8}>
+                  {
+                    this.state.selectedTask === "" ? <div></div> :
+                      <div className="shadow p-3 mb-5 bg-white rounded">
+                        <Simpleactions
+                          state={this.state}
+                          handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
+                          handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}
+                          handleRemoveSimpleaction={(sa) => this.handleRemoveSimpleaction(sa)}
+                          handleSimpleactionSortable={(newState) => this.handleSimpleactionSortable(newState)}
+                        >
+                        </Simpleactions>
+
+                        <Dropdown>
+                          <Dropdown.Toggle id="dropdown-custom-components" as={CustomToggle} title="Search for simpleaction">
+                            Search for simpleaction
+                          </Dropdown.Toggle>
+
+                          <Dropdown.Menu as={CustomMenu}>
+                            {this.state.availableSimpleactions.map(sa => <Dropdown.Item onClick={this.handleAddNewSimpleaction(sa)}> {sa.name} ({sa.robot}) </Dropdown.Item>)}
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      </div>
+                  }
+                </Col>
+              </Row>
+
+              <Button type="submit" variant="outline-dark" onClick={this.handleSubmit}>
+                Send mission
+              </Button>
+            </div>
+          </Col>
+ 
+          <Col xs={3}>
+            <div className="shadow p-3 mb-5 bg-white rounded">
+              <Robot state={this.state}>
+              </Robot>
+            </div>
+          </Col>
+        </Row>
+
       </Container>
     );
   }
@@ -297,8 +303,9 @@ class Mission extends Component {
           <ToggleButtonGroup type="radio" name="options" defaultValue={numMissions}>
             {Object.keys(this.state.predefinedMissions).map(mission => (
               <ToggleButton
+                size="md"
                 variant={mission === this.props.state.selectedMission ? "dark" : "outline-dark"}
-                style={{ marginBottom: 15 }}
+                style={{ height:"50px", lineHeight:"2.2"}}
                 onClick={this.props.handleMissionClick(mission)}>
                 {mission}
               </ToggleButton>
@@ -345,7 +352,7 @@ class Task extends Component {
               <Button
                 style={{ marginLeft: "5px" }}
                 onClick={this.props.handleRemoveTask(task)}
-                variant="outline-dark"
+                variant="outline-danger"
               >
                 X
               </Button>
@@ -449,7 +456,7 @@ class Simpleactions extends Component {
                   </Form.Control>
                 </Form>
 
-                <Button style={{ marginLeft: "5px" }} onClick={this.props.handleRemoveSimpleaction(sa)} variant="outline-dark">
+                <Button style={{ marginLeft: "5px" }} onClick={this.props.handleRemoveSimpleaction(sa)} variant="outline-danger">
                   X
               </Button>
               </ListGroup>
@@ -488,7 +495,7 @@ class Robot extends Component {
           </ToggleButtonGroup>
         </ButtonToolbar>
 
-        <ListGroup style={{ overflow: "scroll", height: "315px" }}>
+        <ListGroup style={{ overflow: "scroll" }}>
           <ListGroupItem>
             Language: {this.state.robots[this.state.showInfoForRobot].language}
           </ListGroupItem>
@@ -543,11 +550,11 @@ class NewMission extends Component {
 
   render() {
     return (
-      <Form inline style={{ marginTop: "40px", marginLeft: "10px" }} onSubmit={this.props.handleAddNewMission(this.state.missionName)}>
+      <Form inline style={{ marginTop: "55px", marginLeft: "15px" }} onSubmit={this.props.handleAddNewMission(this.state.missionName)}>
         <Form.Group >
           <Form.Control onChange={this.handleNameChange} required placeholder="Mission name" type="input" />
 
-          <Button type="submit" variant="outline-dark" style={{}}>
+          <Button type="submit" variant="outline-dark">
             Add new mission
           </Button>
         </Form.Group>
