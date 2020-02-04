@@ -51,13 +51,12 @@ const CustomMenu = React.forwardRef(
 class App extends Component {
   state = {
     robots: data.robots,
-    predefinedMissions: data.predefinedMissions,
-    tasks: data.predefinedTasks,
-    showInfoForRobot: data.defaultShowInfoForRobot,
+    selectedRobot: data.defaultSelectedRobot,
     selectedMission: data.defaultSelectedMission,
     selectedTask: data.defaultSelectedTask,
     availableSimpleactions: [],
-    mission: {}
+    missions: data.missions,
+    currentMission: {}
   }
 
   componentDidMount() {
@@ -76,12 +75,12 @@ class App extends Component {
     this.setState({ availableSimpleactions: availableSimpleactions })
   }
 
-  handleMissionClick = name => event => {
+  handleMissionClick = missionName => event => {
     let newSelectedTask = ""
-    if (this.state.predefinedMissions[name].length > 0)
-      newSelectedTask = this.state.predefinedMissions[name][0].name
+    if (this.state.missions[missionName].tasks.length > 0)
+      newSelectedTask = this.state.missions[missionName].tasks[0].name
 
-    this.setState({ selectedMission: name })
+    this.setState({ selectedMission: missionName })
     this.setState({ selectedTask: newSelectedTask })
     this.handleMissionChange()
   }
@@ -114,96 +113,107 @@ class App extends Component {
   }
 
   handleMissionChange = event => {
-    let preMission = this.state.predefinedMissions[this.state.selectedMission]
-    let tasks = this.state.tasks
+    let tasks = this.state.missions[this.state.selectedMission].tasks
     let robots = this.state.robots
-    let mission = {}
+    let currentMission = {}
 
-    preMission.forEach(task => {
-      tasks[task.name].forEach(simpleaction => {
+    tasks.forEach(task => {
+      task.simpleactions.forEach(simpleaction => {
         let robot = simpleaction.robot
         let simpleactions = [simpleaction]
 
-        if (robot in mission) {
-          simpleactions = mission[robot].simpleactions
+        if (robot in currentMission) {
+          simpleactions = currentMission[robot].simpleactions
           simpleactions.push(simpleaction)
         }
-        else
-          mission[robot] = { port: robots[robot]["port"], language: robots[robot]["language"] }
-        mission[robot].simpleactions = simpleactions
-        tasks[task.name][tasks[task.name].indexOf(simpleaction)].id = mission[robot].simpleactions.length - 1
+        else{
+          currentMission[robot] = { port: robots[robot]["port"], language: robots[robot]["language"] }
+        }
+        currentMission[robot].simpleactions = simpleactions
+        task.simpleactions[task.simpleactions.indexOf(simpleaction)].id = currentMission[robot].simpleactions.length - 1
       })
     })
     this.setState({ tasks: tasks })
-    this.setState({ mission: mission })
+    this.setState({ currentMission: currentMission })
     console.log(this.state)
   }
 
   handleAddNewTask = taskName => event => {
-    let tasks = this.state.tasks
-    let preMission = this.state.predefinedMissions
-    tasks[taskName] = []
-    preMission[this.state.selectedMission].push({ "name": taskName, "id": tasks.length })
-
+    let mission = this.state.missions[this.state.selectedMission]
+    mission.tasks.push({ "name": taskName, "id": mission.tasks.length, simpleactions: []})
     this.setState({ selectedTask: taskName })
-    this.setState({ tasks: tasks })
-    this.setState({ predefinedMissions: preMission })
+    this.setState({ mission: mission })
+
     event.preventDefault()
     event.target.reset()
     this.handleMissionChange()
   }
 
   handleAddNewSimpleaction = sa => event => {
-    let tasks = this.state.tasks
-    tasks[this.state.selectedTask].push({ "name": sa.name, "args": "", "robot": sa.robot })
+    let tasks = this.state.missions[this.state.selectedMission].tasks
+    tasks.forEach(task => {
+      if(task.name === this.state.selectedTask)
+        task.simpleactions.push({ "name": sa.name, "args": "", "robot": sa.robot })
+        tasks[tasks.indexOf(task)] = task
+    })
     this.setState({ tasks: tasks })
     this.handleMissionChange()
   }
 
   handleAddNewMission = missionName => event => {
-    let preMission = this.state.predefinedMissions
-    preMission[missionName] = []
-    event.preventDefault()
-    event.target.reset();
-    this.setState({ predefinedMissions: preMission })
+    let missions = this.state.missions
+    missions[missionName] = {"tasks":[]}
+    this.setState({ missions: missions })
     this.setState({ selectedMission: missionName })
     this.setState({ selectedTask: "" })
+
+    event.preventDefault()
+    event.target.reset();
     this.handleMissionChange()
   }
 
   handleRemoveTask = task => event => {
-    let preMission = this.state.predefinedMissions[this.state.selectedMission]
-    preMission.splice(preMission.indexOf(task), 1)
-    this.setState({ preMission: preMission })
+    let mission = this.state.missions[this.state.selectedMission]
+    mission.tasks.splice(mission.tasks.indexOf(task), 1)
+    this.setState({ mission: mission })
     this.handleMissionChange()
   }
 
   handleRemoveSimpleaction = simpleaction => event => {
-    let task = this.state.tasks[this.state.selectedTask]
-    task.splice(task.indexOf(simpleaction), 1)
-    this.setState({ task: task })
+    let tasks = this.state.missions[this.state.selectedMission].tasks
+    tasks.forEach(task => {
+      if(task.name === this.state.selectedTask){
+        task.simpleactions.splice(task.simpleactions.indexOf(simpleaction), 1)
+      }
+    })
+    this.setState({ tasks: tasks })
     this.handleMissionChange()
   }
 
   handleSimpleactionSortable = newState => {
-    let tasks = this.state.tasks
-    if (newState > tasks[this.state.selectedTask]) {
-      newState.forEach(sa => {
-        if (!tasks[this.state.selectedTask].includes(sa)) {
-          newState[newState.indexOf(sa)] = { "name": sa.name, "args": "", "robot": this.state.showInfoForRobot, "id": (newState.length - 1) }
-        }
-      })
-    }
+    let tasks = this.state.missions[this.state.selectedMission].tasks
 
-    tasks[this.state.selectedTask] = newState
+    tasks.forEach(task => {
+      if(task.name === this.state.selectedTask){
+        if (newState > task.simpleactions) {
+          newState.forEach(sa => {
+            if (!task.simpleactions.includes(sa)) {
+              newState[newState.indexOf(sa)] = { "name": sa.name, "args": "", "robot": this.state.selectedRobot, "id": (newState.length - 1) } 
+            }
+          })
+        }
+        task.simpleactions = newState
+      }
+    })
+
     this.setState({ tasks: tasks })
     this.handleMissionChange()
   }
 
   handleTaskSortable = newState => {
-    let preMissions = this.state.predefinedMissions
-    preMissions[this.state.selectedMission] = newState
-    this.setState({ predefinedMissions: preMissions })
+    let missions = this.state.missions
+    missions[this.state.selectedMission].tasks = newState
+    this.setState({ missions: missions })
     this.handleMissionChange()
   }
 
@@ -234,7 +244,7 @@ class App extends Component {
                   <div className="shadow p-3 mb-5 bg-white rounded">
                     <Task
                       state={this.state}
-                      handleTaskClick={(mission) => this.handleTaskClick(mission)}
+                      handleTaskClick={(currentMission) => this.handleTaskClick(currentMission)}
                       handleRemoveTask={(task) => this.handleRemoveTask(task)}
                       handleTaskSortable={(newState) => this.handleTaskSortable(newState)}>
                     </Task>
@@ -291,17 +301,16 @@ class App extends Component {
 }
 
 class Mission extends Component {
-  state = { predefinedMissions: this.props.state.predefinedMissions }
+  state = { missions: this.props.state.missions }
 
   render() {
-    let numMissions = Object.keys(this.state.predefinedMissions).length
     return (
       <div style={{ marginLeft: "15px" }}>
         <h1>Missions</h1>
 
         <ButtonToolbar>
-          <ToggleButtonGroup type="radio" name="options" defaultValue={numMissions}>
-            {Object.keys(this.state.predefinedMissions).map(mission => (
+          <ToggleButtonGroup type="radio" name="options">
+            {Object.keys(this.state.missions).map(mission => (
               <ToggleButton
                 size="md"
                 variant={mission === this.props.state.selectedMission ? "dark" : "outline-dark"}
@@ -319,11 +328,11 @@ class Mission extends Component {
 class Task extends Component {
   componentWillReceiveProps(nextProps) {
     this.setState({
-      list: nextProps.state.predefinedMissions[nextProps.state.selectedMission]
+      list: nextProps.state.missions[nextProps.state.selectedMission].tasks
     });
   }
   state = {
-    list: this.props.state.predefinedMissions[this.props.state.selectedMission]
+    list: this.props.state.missions[this.props.state.selectedMission].tasks
   }
 
   render() {
@@ -337,7 +346,6 @@ class Task extends Component {
           list={this.state.list}
           setList={newState => this.props.handleTaskSortable(newState)}
           animation={150}
-          group="shared"
         >
           {this.state.list.map(task => (
             <div style={{ display: "flex" }}>
@@ -367,8 +375,7 @@ class Simpleactions extends Component {
   componentWillReceiveProps(nextProps) {
     this.setState({
       robots: nextProps.state.robots,
-      list: nextProps.state.tasks[nextProps.state.selectedTask],
-      mission: nextProps.state.mission
+      list: nextProps.state.tasks[nextProps.state.selectedTask]
     });
   }
 
@@ -406,10 +413,14 @@ class Simpleactions extends Component {
 
   state = {
     robots: this.props.state.robots,
-    list: this.props.state.tasks[this.props.state.selectedTask]
+    list: this.props.state.missions[this.props.state.selectedMission].tasks
   }
 
   render() {
+    this.props.state.missions[this.props.state.selectedMission].tasks.forEach(task => {
+      if(task.name === this.props.state.selectedTask)
+        this.state.list = task.simpleactions
+    })
     if (this.state.list === undefined)
       return (<h3>Simpleactions</h3>)
 
@@ -429,8 +440,8 @@ class Simpleactions extends Component {
                   {this.printNumSequence(sa)}
                 </div>
 
-                <ListGroupItem style={{ width: "225px", overflow: "scroll" }}>
-                  {sa.name}
+                <ListGroupItem style={{ width: "250px", overflow: "scroll" }}>
+                  {makeReadable(sa.name)}
                 </ListGroupItem>
                 <Form>
                   {this.simpleactionNoArguments(sa) ?
@@ -471,12 +482,12 @@ class Simpleactions extends Component {
 class Robot extends Component {
   state = {
     robots: this.props.state.robots,
-    showInfoForRobot: this.props.state.showInfoForRobot,
-    list: this.props.state.robots[this.props.state.showInfoForRobot].simpleactions
+    selectedRobot: this.props.state.selectedRobot,
+    list: this.props.state.robots[this.props.state.selectedRobot].simpleactions
   }
 
   handleRobotClick = name => event => {
-    this.setState({ showInfoForRobot: name, list: this.state.robots[name].simpleactions });
+    this.setState({ selectedRobot: name, list: this.state.robots[name].simpleactions });
   }
 
   render() {
@@ -497,12 +508,14 @@ class Robot extends Component {
 
         <ListGroup style={{ overflow: "scroll" }}>
           <ListGroupItem>
-            Language: {this.state.robots[this.state.showInfoForRobot].language}
+            Language: {this.state.robots[this.state.selectedRobot].language}
           </ListGroupItem>
 
           <ListGroupItem>
-            Port: {this.state.robots[this.state.showInfoForRobot].port}
+            Port: {this.state.robots[this.state.selectedRobot].port}
           </ListGroupItem>
+
+          <div style={{marginBottom:"15px"}}></div>
 
           <ReactSortable
             list={this.state.list}
@@ -510,7 +523,7 @@ class Robot extends Component {
             sort={false}
             group={{ name: 'shared', pull: 'clone', put: false }}
           >
-            {this.state.list.map(sa => <ListGroupItem>{sa.name}</ListGroupItem>)}
+            {this.state.list.map(sa => <ListGroupItem>{makeReadable(sa.name)}</ListGroupItem>)}
           </ReactSortable>
         </ListGroup>
       </div>);
@@ -563,6 +576,11 @@ class NewMission extends Component {
   }
 }
 
+function makeReadable(saName){
+  saName = saName.replace(/_/g, " ")
+  return saName.charAt(0).toUpperCase() + saName.slice(1)
+}
+
 function sendMission(state) {
   console.log('Sending request')
   fetch('http://localhost:5000/controller', {
@@ -571,7 +589,7 @@ function sendMission(state) {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(state.mission)
+    body: JSON.stringify(state.currentMission)
   })
     .then(res => console.log(res))
     .catch(console.log)

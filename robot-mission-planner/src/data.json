@@ -30,68 +30,75 @@
             ]
         }
     },
-    "predefinedTasks": {
-        "Scout location": [
-            {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":"0"}, 
-            {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":"1"}, 
-            {"name":"go_to_location", "args":"[388, -365]", "robot":"mavic2pro", "id":"2"}
-        ],
-        "Scout area": [
-            {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":"0"}, 
-            {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":"1"}, 
-            {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"2"},
-            {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":"3"},
-            {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"4"},
-            {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":"5"},
-            {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"6"},
-            {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":"7"},
-            {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"8"}
-        ],
-        "Send message": [
-            {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":"0"}, 
-            {"name":"send_location", "args":"", "robot":"mavic2pro", "id":"1"}
-        ],
-        "Receive and go to location": [
-            {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":"0"}, 
-            {"name":"go_to_location", "args":"[]", "robot":"moose", "id":"1"}
-        ]
-    },
-    "predefinedMissions": {
-        "Scout location and deliver item": [
-            {"name":"Scout location", "id": "0"},
-            {"name":"Send message", "id": "1"},
-            {"name":"Receive and go to location", "id": "2"}
-        ],
-        "Scout area and deliver item": [
-            {"name":"Scout area", "id": "0"},
-            {"name":"Send message", "id": "1"},
-            {"name":"Receive and go to location", "id": "2"}
-        ]
-    },                
-    "mission": {
-        "mavic2pro" : {
-            "language" : "python",
-            "port" : "5001",
-            "simpleactions" : [
-            "set_altitude(1)", 
-            "recognise_objects()", 
-            "set_message_target('moose')", 
-            "go_to_location([388. -365])", 
-            "turn_left(4)", 
-            "go_forward(4)"
+    
+    "missions": {
+        "Scout location and deliver item": { 
+            "tasks": [
+                {
+                    "name":"Scout location", 
+                    "id": "0", 
+                    "simpleactions":[
+                        {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":"0"}, 
+                        {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":"1"}, 
+                        {"name":"go_to_location", "args":"[388, -365]", "robot":"mavic2pro", "id":"2"}
+                    ]
+                },
+                {
+                    "name":"Send message", 
+                    "id": "1", 
+                    "simpleactions":[
+                        {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":"0"}, 
+                        {"name":"send_location", "args":"", "robot":"mavic2pro", "id":"1"}
+                    ]
+                },
+                {
+                    "name":"Receive and go to location", 
+                    "id": "2", 
+                    "simpleactions":[
+                        {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":"0"}, 
+                        {"name":"go_to_location", "args":"[]", "robot":"moose", "id":"1"}
+                    ]
+                }
+            ]
+        },
+        "Scout area and deliver item": {
+            "tasks": [
+                {
+                    "name":"Scout area", 
+                    "id": "0", 
+                    "simpleactions":[
+                        {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":"0"}, 
+                        {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":"1"}, 
+                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"2"},
+                        {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":"3"},
+                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"4"},
+                        {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":"5"},
+                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"6"},
+                        {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":"7"},
+                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"8"}
+                    ]
+                },
+                {
+                    "name":"Send message", 
+                    "id": "1", 
+                    "simpleactions":[
+                        {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":"0"}, 
+                        {"name":"send_location", "args":"", "robot":"mavic2pro", "id":"1"}
+                    ]
+                },
+                {
+                    "name":"Receive and go to location", 
+                    "id": "2", 
+                    "simpleactions":[
+                        {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":"0"}, 
+                        {"name":"go_to_location", "args":"[]", "robot":"moose", "id":"1"}
+                    ]
+                }
             ]
         }
-        ,
-        "moose": {
-            "language" : "python",
-            "port" : "5002",
-            "simpleactions" : [
-            "receive_location_from_robot()",
-            "go_to_location([])"
-            ]
-        }
-    },
-    "defaultShowInfoForRobot": "mavic2pro",                
+    },   
+
+    "defaultSelectedRobot": "mavic2pro",                
     "defaultSelectedMission": "Scout location and deliver item",   
     "defaultSelectedTask": "Scout location"         
 }
