@@ -1,0 +1,58 @@
+module RobotSync;
+
+interface IRobot{
+    Unit execute(IRobot r);
+  	Unit async();
+  	Unit wait(IRobot r);
+    Unit notify(IRobot r);
+}
+
+
+class R1 implements IRobot{
+  Unit execute(IRobot r){
+    this.async();
+    this.wait(r);
+    this.async();
+  }
+  
+  Unit wait(IRobot r){
+    Fut<Unit> f;
+    f = r!notify(this);
+    f.get;
+  }
+  
+  Unit notify(IRobot r){
+  }
+  
+  Unit async(){
+  }
+}
+
+
+class R2 implements IRobot{
+  Unit execute(IRobot r){
+    this.async();
+    this.async();
+    this.notify(r);
+  }
+  
+  Unit wait(IRobot r){
+    Fut<Unit> f;
+    f = r!notify(this);
+    f.get;
+  }
+  
+  Unit notify(IRobot r){
+  }
+  
+  Unit async(){
+  }
+}
+
+{
+  
+  IRobot r1 =new local R1();
+  IRobot r2 =new local R2();
+  r1!execute(r2);
+  r2!execute(r1);
+}
