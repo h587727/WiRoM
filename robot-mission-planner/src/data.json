@@ -98,6 +98,28 @@
         }
     },   
 
+    "defaultCurrentMission":{
+        "mavic2pro":{
+            "language" : "python",
+            "port" : "5001",
+            "simpleactions":[
+                {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":"0"}, 
+                {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":"1"}, 
+                {"name":"go_to_location", "args":"[388, -365]", "robot":"mavic2pro", "id":"2"},
+                {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":"3"}, 
+                {"name":"send_location", "args":"", "robot":"mavic2pro", "id":"4"}
+            ]
+
+        },
+        "moose":{
+            "language" : "python",
+            "port" : "5002",
+            "simpleactions":[
+                {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":"0"}, 
+                {"name":"go_to_location", "args":"[]", "robot":"moose", "id":"1"}
+            ]
+        }
+    },
     "defaultSelectedRobot": "mavic2pro",                
     "defaultSelectedMission": "Scout location and deliver item",   
     "defaultSelectedTask": "Scout location"         

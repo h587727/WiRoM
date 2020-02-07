@@ -1,7 +1,4 @@
-// Running example of the paper
-// main1
-
-module Running1;
+module TaskSync;
 
 interface ITaskQueue{
   Unit addTask(ITask tk);

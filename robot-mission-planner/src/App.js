@@ -4,6 +4,29 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
 import { Button, Form, Dropdown, Container, Col, Row, ListGroup, ListGroupItem, ToggleButton, ToggleButtonGroup, ButtonToolbar } from 'react-bootstrap';
 import { ReactSortable } from "react-sortablejs";
+import { Graph } from "react-d3-graph";
+
+// the graph configuration, you only need to pass down properties
+// that you want to override, otherwise default ones will be used
+const myConfig = {
+  nodeHighlightBehavior: true,
+  staticGraph: true,
+  automaticRearrangeAfterDropNode: true,
+  directed: true,
+  width: "950px",
+  d3: {
+    linklength: 200,
+    linkStrength: 1
+  },
+  node: {
+    color: "#7e11c3",
+    size: 200,
+    highlightStrokeColor: "#cf0404",
+  },
+  link: {
+    highlightColor: "#cf0404",
+  },
+};
 
 const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
   <a
@@ -56,7 +79,9 @@ class App extends Component {
     selectedTask: data.defaultSelectedTask,
     availableSimpleactions: [],
     missions: data.missions,
-    currentMission: {}
+    currentMission: data.defaultCurrentMission,
+    graphData: { nodes: [{ id: "robot" }], links: [] },
+    showTimeline: false
   }
 
   componentDidMount() {
@@ -69,10 +94,48 @@ class App extends Component {
 
     for (let robot in this.state.robots) {
       this.state.robots[robot].simpleactions.forEach(sa => {
-        availableSimpleactions.push({ "name": sa.name, "robot": robot, "numArgs": sa.numArgs })
+        availableSimpleactions.push({ "name": sa.name, "robot": robot, "numArgs": sa.numArgs, "type": sa.type })
       })
     }
     this.setState({ availableSimpleactions: availableSimpleactions })
+  }
+
+  generateGraphData() {
+    let mission = this.state.currentMission
+    let x = 50
+    let y = 100
+    let data = { nodes: [], links: [] }
+    let waitNode = ""
+    let notifyNode = ""
+    Object.keys(mission).forEach(robot => {
+      data["nodes"].push({ id: robot, x: x, y: y, symbolType: "wye" })
+      let prevNode = robot
+      x += 120
+      mission[robot].simpleactions.forEach(sa => {
+        this.state.availableSimpleactions.forEach(availSa => {
+          if (availSa.robot === robot && availSa.name === sa.name) {
+            if (availSa.type === "wait") {
+              waitNode = sa
+            }
+            if (availSa.type === "notify") {
+              notifyNode = sa
+            }
+            if (notifyNode !== "" && waitNode !== "") {
+              data["links"].push({ source: notifyNode.name + "(" + notifyNode.args + ")", target: waitNode.name + "(" + waitNode.args + ")" })
+              notifyNode = waitNode = ""
+            }
+          }
+        })
+        data["nodes"].push({ id: sa.name + "(" + sa.args + ")", x: x, y: y })
+        data["links"].push({ source: prevNode, target: sa.name + "(" + sa.args + ")" })
+        prevNode = sa.name + "(" + sa.args + ")"
+        x += 120
+      })
+      x = 50
+      y += 100
+    })
+    console.log(data)
+    this.setState({ graphData: data })
   }
 
   handleMissionClick = missionName => event => {
@@ -90,20 +153,32 @@ class App extends Component {
   }
 
   handleSimpleActionArgsChange = sa => event => {
-    let task = this.state.tasks[this.state.selectedTask]
-    let newTask = task
-
-    newTask[task.indexOf(sa)].args = event.target.value
-    this.setState({ task: newTask })
+    let tasks = this.state.missions[this.state.selectedMission].tasks
+    let newSa = sa
+    tasks.forEach(task => {
+      task.simpleactions.forEach(simpleaction => {
+        if (simpleaction = sa) {
+          newSa = simpleaction
+          newSa.args = event.target.value
+        }
+      })
+    })
+    this.setState({ sa: newSa })
     this.handleMissionChange()
   }
 
   handleSimpleActionRobotChange = sa => event => {
-    let task = this.state.tasks[this.state.selectedTask]
-    let newTask = task
-
-    newTask[task.indexOf(sa)].robot = event.target.value
-    this.setState({ task: newTask })
+    let tasks = this.state.missions[this.state.selectedMission].tasks
+    let newSa = sa
+    tasks.forEach(task => {
+      task.simpleactions.forEach(simpleaction => {
+        if (simpleaction = sa) {
+          newSa = simpleaction
+          newSa.robot = event.target.value
+        }
+      })
+    })
+    this.setState({ sa: newSa })
     this.handleMissionChange()
   }
 
@@ -115,32 +190,33 @@ class App extends Component {
   handleMissionChange = event => {
     let tasks = this.state.missions[this.state.selectedMission].tasks
     let robots = this.state.robots
-    let currentMission = {}
+    let newCurrentMission = {}
 
     tasks.forEach(task => {
       task.simpleactions.forEach(simpleaction => {
         let robot = simpleaction.robot
         let simpleactions = [simpleaction]
 
-        if (robot in currentMission) {
-          simpleactions = currentMission[robot].simpleactions
+        if (robot in newCurrentMission) {
+          simpleactions = newCurrentMission[robot].simpleactions
           simpleactions.push(simpleaction)
         }
-        else{
-          currentMission[robot] = { port: robots[robot]["port"], language: robots[robot]["language"] }
+        else {
+          newCurrentMission[robot] = { port: robots[robot]["port"], language: robots[robot]["language"] }
         }
-        currentMission[robot].simpleactions = simpleactions
-        task.simpleactions[task.simpleactions.indexOf(simpleaction)].id = currentMission[robot].simpleactions.length - 1
+        newCurrentMission[robot].simpleactions = simpleactions
+        task.simpleactions[task.simpleactions.indexOf(simpleaction)].id = newCurrentMission[robot].simpleactions.length - 1
       })
     })
     this.setState({ tasks: tasks })
-    this.setState({ currentMission: currentMission })
+    this.setState({ currentMission: newCurrentMission })
     console.log(this.state)
+    this.generateGraphData()
   }
 
   handleAddNewTask = taskName => event => {
     let mission = this.state.missions[this.state.selectedMission]
-    mission.tasks.push({ "name": taskName, "id": mission.tasks.length, simpleactions: []})
+    mission.tasks.push({ "name": taskName, "id": mission.tasks.length, simpleactions: [] })
     this.setState({ selectedTask: taskName })
     this.setState({ mission: mission })
 
@@ -152,9 +228,9 @@ class App extends Component {
   handleAddNewSimpleaction = sa => event => {
     let tasks = this.state.missions[this.state.selectedMission].tasks
     tasks.forEach(task => {
-      if(task.name === this.state.selectedTask)
+      if (task.name === this.state.selectedTask)
         task.simpleactions.push({ "name": sa.name, "args": "", "robot": sa.robot })
-        tasks[tasks.indexOf(task)] = task
+      tasks[tasks.indexOf(task)] = task
     })
     this.setState({ tasks: tasks })
     this.handleMissionChange()
@@ -162,7 +238,7 @@ class App extends Component {
 
   handleAddNewMission = missionName => event => {
     let missions = this.state.missions
-    missions[missionName] = {"tasks":[]}
+    missions[missionName] = { "tasks": [] }
     this.setState({ missions: missions })
     this.setState({ selectedMission: missionName })
     this.setState({ selectedTask: "" })
@@ -182,7 +258,7 @@ class App extends Component {
   handleRemoveSimpleaction = simpleaction => event => {
     let tasks = this.state.missions[this.state.selectedMission].tasks
     tasks.forEach(task => {
-      if(task.name === this.state.selectedTask){
+      if (task.name === this.state.selectedTask) {
         task.simpleactions.splice(task.simpleactions.indexOf(simpleaction), 1)
       }
     })
@@ -194,11 +270,11 @@ class App extends Component {
     let tasks = this.state.missions[this.state.selectedMission].tasks
 
     tasks.forEach(task => {
-      if(task.name === this.state.selectedTask){
+      if (task.name === this.state.selectedTask) {
         if (newState > task.simpleactions) {
           newState.forEach(sa => {
             if (!task.simpleactions.includes(sa)) {
-              newState[newState.indexOf(sa)] = { "name": sa.name, "args": "", "robot": this.state.selectedRobot, "id": (newState.length - 1) } 
+              newState[newState.indexOf(sa)] = { "name": sa.name, "args": "", "robot": this.state.selectedRobot, "id": (newState.length - 1) }
             }
           })
         }
@@ -220,9 +296,9 @@ class App extends Component {
   render() {
     return (
       <Container fluid>
-        <Row style={{marginTop:"30px"}}>
+        <Row style={{ marginTop: "30px" }}>
           <Col xs="9">
-            <div className="shadow p-3 mb-5 rounded" style={{backgroundColor:"#f2f2f2"}}>
+            <div className="shadow p-3 mb-5 rounded" style={{ backgroundColor: "#f2f2f2" }}>
               <div className="shadow p-3 mb-5 bg-white rounded">
                 <Row>
                   <Mission
@@ -236,7 +312,7 @@ class App extends Component {
                     handleAddNewMission={(missionName) => this.handleAddNewMission(missionName)}
                   >
                   </NewMission>
-                  </Row>
+                </Row>
               </div>
 
               <Row style={{ marginBottom: "15px" }}>
@@ -281,12 +357,26 @@ class App extends Component {
                 </Col>
               </Row>
 
+              <div className="shadow p-3 mb-5 bg-white rounded">
+                {this.state.showTimeline &&
+                  <Graph
+                    id="mission-planner" // id is mandatory, if no id is defined rd3g will throw an error
+                    data={this.state.graphData}
+                    config={myConfig}>
+                  </Graph>
+                }
+              </div>
+
               <Button type="submit" variant="outline-dark" onClick={this.handleSubmit}>
                 Send mission
               </Button>
+
+              <Button variant="outline-dark" onClick={() => this.setState({ showTimeline: !this.state.showTimeline })}>
+                {this.state.showTimeline ? "Hide mission timeline" : "Show mission timeline"}
+              </Button>
             </div>
           </Col>
- 
+
           <Col xs={3}>
             <div className="shadow p-3 mb-5 bg-white rounded">
               <Robot state={this.state}>
@@ -314,7 +404,7 @@ class Mission extends Component {
               <ToggleButton
                 size="md"
                 variant={mission === this.props.state.selectedMission ? "dark" : "outline-dark"}
-                style={{ height:"50px", lineHeight:"2.2"}}
+                style={{ height: "50px", lineHeight: "2.2" }}
                 onClick={this.props.handleMissionClick(mission)}>
                 {mission}
               </ToggleButton>
@@ -418,7 +508,7 @@ class Simpleactions extends Component {
 
   render() {
     this.props.state.missions[this.props.state.selectedMission].tasks.forEach(task => {
-      if(task.name === this.props.state.selectedTask)
+      if (task.name === this.props.state.selectedTask)
         this.state.list = task.simpleactions
     })
     if (this.state.list === undefined)
@@ -515,7 +605,7 @@ class Robot extends Component {
             Port: {this.state.robots[this.state.selectedRobot].port}
           </ListGroupItem>
 
-          <div style={{marginBottom:"15px"}}></div>
+          <div style={{ marginBottom: "15px" }}></div>
 
           <ReactSortable
             list={this.state.list}
@@ -576,7 +666,7 @@ class NewMission extends Component {
   }
 }
 
-function makeReadable(saName){
+function makeReadable(saName) {
   saName = saName.replace(/_/g, " ")
   return saName.charAt(0).toUpperCase() + saName.slice(1)
 }
