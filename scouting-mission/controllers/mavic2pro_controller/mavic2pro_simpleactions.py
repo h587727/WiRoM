@@ -129,13 +129,13 @@ def stop_movement():
 def send_location():
     global recognise
     global navigate
-    send = threading.Thread(target=async_send_location)
+    send = threading.Thread(target=sync_send_location)
     send.start()
     #recognise = True
     #navigate = True
 
-def async_send_location():
-    location_json =  {"location": [rec_obj_pos[0], rec_obj_pos[2]]}
+def sync_send_location():
+    location_json = {"location": [location[0], location[1] - 5]} #[rec_obj_pos[0], rec_obj_pos[2]]}
     requests.post("http://localhost:5002/location", json = location_json)
 
 # Function that finds the angle and distance to a location and moves the vehicle accordingly

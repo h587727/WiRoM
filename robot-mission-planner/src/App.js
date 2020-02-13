@@ -15,18 +15,27 @@ const myConfig = {
   directed: true,
   width: "950px",
   d3: {
-    linklength: 200,
+    linklength: 2000,
     linkStrength: 1
   },
   node: {
     color: "#7e11c3",
     size: 200,
     highlightStrokeColor: "#cf0404",
+    labelProperty: myCustomLabelBuilder,
+    renderLabel: true
   },
   link: {
+    color: "#d3d3d3",
+    //renderLabel:true,
+    labelProperty: "label",
     highlightColor: "#cf0404",
   },
 };
+
+function myCustomLabelBuilder(node) {
+  return makeReadable(node.id.split(";")[0]);
+}
 
 const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
   <a
@@ -87,6 +96,7 @@ class App extends Component {
   componentDidMount() {
     this.handleMissionChange()
     this.handleAvailableSimpleactionsChange()
+    this.generateGraphData()
   }
 
   handleAvailableSimpleactionsChange = event => {
@@ -115,20 +125,23 @@ class App extends Component {
         this.state.availableSimpleactions.forEach(availSa => {
           if (availSa.robot === robot && availSa.name === sa.name) {
             if (availSa.type === "wait") {
-              waitNode = sa
+              waitNode = { name: sa.name, x: x, y: y }
             }
             if (availSa.type === "notify") {
-              notifyNode = sa
+              notifyNode = { name: sa.name, x: x, y: y }
             }
             if (notifyNode !== "" && waitNode !== "") {
-              data["links"].push({ source: notifyNode.name + "(" + notifyNode.args + ")", target: waitNode.name + "(" + waitNode.args + ")" })
+              data["links"].push({
+                source: this.nodeName(notifyNode.name, notifyNode.x, notifyNode.y),
+                target: this.nodeName(waitNode.name, waitNode.x, waitNode.y)
+              })
               notifyNode = waitNode = ""
             }
           }
         })
-        data["nodes"].push({ id: sa.name + "(" + sa.args + ")", x: x, y: y })
-        data["links"].push({ source: prevNode, target: sa.name + "(" + sa.args + ")" })
-        prevNode = sa.name + "(" + sa.args + ")"
+        data["nodes"].push({ id: this.nodeName(sa.name, x, y), x: x, y: y })
+        data["links"].push({ label: sa.name, source: prevNode, target: this.nodeName(sa.name, x, y) })
+        prevNode = this.nodeName(sa.name, x, y)
         x += 120
       })
       x = 50
@@ -136,6 +149,10 @@ class App extends Component {
     })
     console.log(data)
     this.setState({ graphData: data })
+  }
+
+  nodeName(name, x, y) {
+    return name + ";" + x + "," + y
   }
 
   handleMissionClick = missionName => event => {
@@ -146,6 +163,10 @@ class App extends Component {
     this.setState({ selectedMission: missionName })
     this.setState({ selectedTask: newSelectedTask })
     this.handleMissionChange()
+  }
+
+  handleRobotClick = name => event => {
+    this.setState({ selectedRobot: name });
   }
 
   handleTaskClick = name => event => {
@@ -334,14 +355,14 @@ class App extends Component {
                   {
                     this.state.selectedTask === "" ? <div></div> :
                       <div className="shadow p-3 mb-5 bg-white rounded">
-                        <Simpleactions
+                        <Simpleaction
                           state={this.state}
                           handleSimpleActionArgsChange={(sa) => this.handleSimpleActionArgsChange(sa)}
                           handleSimpleActionRobotChange={(sa) => this.handleSimpleActionRobotChange(sa)}
                           handleRemoveSimpleaction={(sa) => this.handleRemoveSimpleaction(sa)}
                           handleSimpleactionSortable={(newState) => this.handleSimpleactionSortable(newState)}
                         >
-                        </Simpleactions>
+                        </Simpleaction>
 
                         <Dropdown>
                           <Dropdown.Toggle id="dropdown-custom-components" as={CustomToggle} title="Search for simpleaction">
@@ -357,15 +378,15 @@ class App extends Component {
                 </Col>
               </Row>
 
-              <div className="shadow p-3 mb-5 bg-white rounded">
-                {this.state.showTimeline &&
+              {this.state.showTimeline &&
+                <div className="shadow p-3 mb-5 bg-white rounded">
                   <Graph
                     id="mission-planner" // id is mandatory, if no id is defined rd3g will throw an error
                     data={this.state.graphData}
                     config={myConfig}>
                   </Graph>
-                }
-              </div>
+                </div>
+              }
 
               <Button type="submit" variant="outline-dark" onClick={this.handleSubmit}>
                 Send mission
@@ -379,7 +400,9 @@ class App extends Component {
 
           <Col xs={3}>
             <div className="shadow p-3 mb-5 bg-white rounded">
-              <Robot state={this.state}>
+              <Robot
+                state={this.state}
+                handleRobotClick={(name) => this.handleRobotClick(name)}>
               </Robot>
             </div>
           </Col>
@@ -461,7 +484,7 @@ class Task extends Component {
   }
 }
 
-class Simpleactions extends Component {
+class Simpleaction extends Component {
   componentWillReceiveProps(nextProps) {
     this.setState({
       robots: nextProps.state.robots,
@@ -570,18 +593,16 @@ class Simpleactions extends Component {
 }
 
 class Robot extends Component {
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      list: nextProps.state.robots[nextProps.state.selectedRobot].simpleactions
+    })
+  }
   state = {
-    robots: this.props.state.robots,
-    selectedRobot: this.props.state.selectedRobot,
     list: this.props.state.robots[this.props.state.selectedRobot].simpleactions
   }
 
-  handleRobotClick = name => event => {
-    this.setState({ selectedRobot: name, list: this.state.robots[name].simpleactions });
-  }
-
   render() {
-    let numRobots = Object.keys(this.state.robots).length
     return (
       <div>
         <h3>
@@ -589,20 +610,25 @@ class Robot extends Component {
         </h3>
 
         <ButtonToolbar style={{ marginBottom: "15px" }}>
-          <ToggleButtonGroup type="radio" name="options" defaultValue={numRobots}>
-            {Object.keys(this.state.robots).map(r => (
-              <ToggleButton value={numRobots--} size="sm" variant="outline-dark" onClick={this.handleRobotClick(r)}>{r}</ToggleButton>)
-            )}
+          <ToggleButtonGroup type="radio" name="options">
+            {Object.keys(this.props.state.robots).map(robot => (
+              <ToggleButton
+                size="sm"
+                variant={robot === this.props.state.selectedRobot ? "dark" : "outline-dark"}
+                onClick={this.props.handleRobotClick(robot)}
+              >
+                {robot}
+              </ToggleButton>))}
           </ToggleButtonGroup>
         </ButtonToolbar>
 
         <ListGroup style={{ overflow: "scroll" }}>
           <ListGroupItem>
-            Language: {this.state.robots[this.state.selectedRobot].language}
+            Language: {this.props.state.robots[this.props.state.selectedRobot].language}
           </ListGroupItem>
 
           <ListGroupItem>
-            Port: {this.state.robots[this.state.selectedRobot].port}
+            Port: {this.props.state.robots[this.props.state.selectedRobot].port}
           </ListGroupItem>
 
           <div style={{ marginBottom: "15px" }}></div>
