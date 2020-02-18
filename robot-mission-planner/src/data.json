@@ -36,27 +36,27 @@
             "tasks": [
                 {
                     "name":"Scout location", 
-                    "id": "0", 
+                    "id": 0, 
                     "simpleactions":[
-                        {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":"0"}, 
-                        {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":"1"}, 
-                        {"name":"go_to_location", "args":"[388, -365]", "robot":"mavic2pro", "id":"2"}
+                        {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":0}, 
+                        {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":1}, 
+                        {"name":"go_to_location", "args":"[388, -365]", "robot":"mavic2pro", "id":2}
                     ]
                 },
                 {
                     "name":"Send message", 
-                    "id": "1", 
+                    "id": 1, 
                     "simpleactions":[
-                        {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":"0"}, 
-                        {"name":"send_location", "args":"", "robot":"mavic2pro", "id":"1"}
+                        {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":3}, 
+                        {"name":"send_location", "args":"", "robot":"mavic2pro", "id":4}
                     ]
                 },
                 {
                     "name":"Receive and go to location", 
-                    "id": "2", 
+                    "id": 2, 
                     "simpleactions":[
-                        {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":"0"}, 
-                        {"name":"go_to_location", "args":"[]", "robot":"moose", "id":"1"}
+                        {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":0}, 
+                        {"name":"go_to_location", "args":"[]", "robot":"moose", "id":1}
                     ]
                 }
             ]
@@ -65,33 +65,33 @@
             "tasks": [
                 {
                     "name":"Scout area", 
-                    "id": "0", 
+                    "id": 0, 
                     "simpleactions":[
-                        {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":"0"}, 
-                        {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":"1"}, 
-                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"2"},
-                        {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":"3"},
-                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"4"},
-                        {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":"5"},
-                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"6"},
-                        {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":"7"},
-                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":"8"}
+                        {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":0}, 
+                        {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":1}, 
+                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":2},
+                        {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":3},
+                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":4},
+                        {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":5},
+                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":6},
+                        {"name":"turn_left", "args":"3", "robot":"mavic2pro", "id":7},
+                        {"name":"go_forward", "args":"30", "robot":"mavic2pro", "id":8}
                     ]
                 },
                 {
                     "name":"Send message", 
-                    "id": "1", 
+                    "id": 1, 
                     "simpleactions":[
-                        {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":"0"}, 
-                        {"name":"send_location", "args":"", "robot":"mavic2pro", "id":"1"}
+                        {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":9}, 
+                        {"name":"send_location", "args":"", "robot":"mavic2pro", "id":10}
                     ]
                 },
                 {
                     "name":"Receive and go to location", 
                     "id": "2", 
                     "simpleactions":[
-                        {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":"0"}, 
-                        {"name":"go_to_location", "args":"[]", "robot":"moose", "id":"1"}
+                        {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":0}, 
+                        {"name":"go_to_location", "args":"[]", "robot":"moose", "id":1}
                     ]
                 }
             ]
@@ -103,11 +103,11 @@
             "language" : "python",
             "port" : "5001",
             "simpleactions":[
-                {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":"0"}, 
-                {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":"1"}, 
-                {"name":"go_to_location", "args":"[388, -365]", "robot":"mavic2pro", "id":"2"},
-                {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":"3"}, 
-                {"name":"send_location", "args":"", "robot":"mavic2pro", "id":"4"}
+                {"name":"set_altitude", "args":"1", "robot":"mavic2pro", "id":0}, 
+                {"name":"recognise_objects", "args":"", "robot":"mavic2pro", "id":1}, 
+                {"name":"go_to_location", "args":"[388, -365]", "robot":"mavic2pro", "id":2},
+                {"name":"set_message_target", "args":"'moose'", "robot":"mavic2pro", "id":3}, 
+                {"name":"send_location", "args":"", "robot":"mavic2pro", "id":4}
             ]
 
         },
@@ -115,8 +115,8 @@
             "language" : "python",
             "port" : "5002",
             "simpleactions":[
-                {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":"0"}, 
-                {"name":"go_to_location", "args":"[]", "robot":"moose", "id":"1"}
+                {"name":"receive_location_from_robot", "args":"", "robot":"moose", "id":0}, 
+                {"name":"go_to_location", "args":"[]", "robot":"moose", "id":1}
             ]
         }
     },
