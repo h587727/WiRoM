@@ -9,7 +9,7 @@ import NewTask from '../NewTask/NewTask'
 import MissionTimeline from '../MissionTimeline/MissionTimeline'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
-import { Button, Form, Dropdown, Container, Col, Row} from 'react-bootstrap';
+import { Button, Form, Dropdown, Container, Col, Row } from 'react-bootstrap';
 
 //Toggle used by the Dropdown component when searching for simpleactions
 const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
@@ -74,7 +74,7 @@ class App extends Component {
     this.handleMissionChange()
     this.handleAvailableSimpleactionsChange()
   }
-  
+
   //Create new current mission, called everytime the missions changes in the ui
   handleMissionChange = event => {
     let tasks = this.state.missions[this.state.selectedMission].tasks
@@ -86,7 +86,7 @@ class App extends Component {
       task.simpleactions.forEach(simpleaction => {
         let robot = simpleaction.robot
         let newSimpleactions = []
-        
+
         if (robot in newMission) {
           newSimpleactions = newMission[robot].simpleactions
           simpleaction.id = newSimpleactions.length
@@ -143,7 +143,7 @@ class App extends Component {
     let newSa = sa
     tasks.forEach(task => {
       task.simpleactions.forEach(simpleaction => {
-        if (simpleaction = sa) {
+        if (simpleaction === sa) {
           newSa = simpleaction
           newSa.args = event.target.value
         }
@@ -159,7 +159,7 @@ class App extends Component {
     let newSa = sa
     tasks.forEach(task => {
       task.simpleactions.forEach(simpleaction => {
-        if (simpleaction = sa) {
+        if (simpleaction === sa) {
           newSa = simpleaction
           newSa.robot = event.target.value
         }

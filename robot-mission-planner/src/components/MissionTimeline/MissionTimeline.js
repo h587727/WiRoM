@@ -97,7 +97,6 @@ class MissionTimeline extends Component {
             y += 100
         })
         this.setState({ graphData: data })
-        console.log(data)
     }
 
     render() {
