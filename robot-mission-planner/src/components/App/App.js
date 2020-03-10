@@ -101,7 +101,7 @@ class App extends Component {
       })
     })
     this.setState({ currentMission: newMission })
-    console.log(this.state.currentMission)
+    console.log(this.state)
   }
 
   //Create a list of all avaiable simpleactions from the different robots, used for conveniance
@@ -253,8 +253,20 @@ class App extends Component {
   }
 
   //Submit the mission and send it to the backend
-  handleSubmit = event => {
+  handleSubmitMission = event => {
     sendMission(this.state);
+    event.preventDefault();
+  } 
+  
+  //Send the mission to the backend to perform automatic task allocation
+  //The new task allocation is returned in the response of the request and updated here
+  handleSubmitTaskAllocation = event => {
+    let response = sendTaskAllocation(this.state);
+    response.then(res => {
+      let missions = this.state.missions
+      missions[this.state.selectedMission].tasks = res
+      this.setState({missions: missions})
+    })
     event.preventDefault();
   }
 
@@ -326,8 +338,12 @@ class App extends Component {
                 <Col>
                   <MissionTimeline state={this.state}></MissionTimeline>
 
-                  <Button type="submit" variant="outline-dark" onClick={this.handleSubmit}>
+                  <Button type="submit" variant="outline-dark" onClick={this.handleSubmitMission}>
                     Send mission
+                  </Button>
+
+                  <Button type="submit" variant="outline-dark" onClick={this.handleSubmitTaskAllocation}>
+                    Automatic task allocation
                   </Button>
                 </Col>
               </Row>
@@ -343,10 +359,24 @@ class App extends Component {
             </div>
           </Col>
         </Row>
-
       </Container>
     );
   }
+}
+
+function sendTaskAllocation(state) {
+  console.log('Sending request')
+  let res = fetch('http://localhost:5000/allocate', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(state.missions[state.selectedMission].tasks)
+  })
+    .then(res => {console.log(res); return res.json()})
+    .catch(console.log)
+  return res
 }
 
 function sendMission(state) {
