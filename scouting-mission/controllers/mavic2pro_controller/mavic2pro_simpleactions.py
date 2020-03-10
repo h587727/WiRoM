@@ -125,7 +125,6 @@ def stop_movement():
     pitch_disturbance = 0
     yaw_disturbance = 0
 
-# Utilize a global JSON file as a simple way of sending information between robots
 def send_location():
     global recognise
     global navigate
@@ -208,6 +207,7 @@ def mavic2pro_main():
     global recognise
     global navigate
     global rec_obj_pos
+
 
     for motor in motors:
         motor.setPosition(float('inf'))
