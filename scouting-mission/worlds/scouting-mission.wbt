@@ -7,8 +7,8 @@ WorldInfo {
   }
 }
 Viewpoint {
-  orientation -0.009743514566754399 0.9984530435199019 0.054741061459677894 2.6772152430639915
-  position 412.1810272014245 1.6175022145357558 -409.8485836828033
+  orientation -0.014493000052637506 0.9977909265449214 0.06483224393850512 2.607586984532383
+  position 412.19730387078346 1.4860549891640709 -409.62900849549715
   follow "moose"
 }
 TexturedBackground {
@@ -26,8 +26,9 @@ UnevenTerrain {
 }
 SolidBox {
   translation 407.28 -0.54 -401.17
+  rotation 0 1 0 0.261799
   name "box(2)"
-  size 1 0.5 1
+  size 3 0.8 2
   appearance PBRAppearance {
     baseColorMap ImageTexture {
       url [
@@ -38,8 +39,32 @@ SolidBox {
     metalness 0
   }
 }
+SolidBox {
+  translation 408.218 0.24 -398.34
+  rotation 0 1 0 0.261799
+  name "box(1)"
+  size 1 0.5 1
+  appearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "textures/wood.jpg"
+      ]
+    }
+    roughness 0.5
+    metalness 0
+  }
+  physics Physics {
+    mass 1
+  }
+}
+SoccerBall {
+  translation 406.497 0.0048988 -400.953
+  rotation 0.3368530570273747 0.8495491438240097 -0.4059510687252891 -1.312095307179586
+  radius 0.1
+  mass 0.01
+}
 Mavic2Pro {
-  translation 407.361 -0.204817 -401.169
+  translation 408.098 0.00027032 -401.378
   rotation 0.06813326818388707 0.7086996690593406 0.702212672088566 -2.9074453071795863
   controller "mavic2pro_controller"
   bodySlot [
@@ -63,7 +88,7 @@ Mavic2Pro {
   ]
 }
 Moose {
-  translation 407.383 -0.44 -398.093
+  translation 407.683 -0.44 -398.183
   rotation 0 1 0 -2.8797853071795863
   controller "moose_controller"
   bodySlot [
@@ -75,6 +100,18 @@ Moose {
     }
   ]
 }
-OilBarrel {
-  translation 387.56 -0.5 -364.59
+SolidBox {
+  size 1 0.5 1
+  appearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "textures/wood.jpg"
+      ]
+    }
+    roughness 0.5
+    metalness 0
+  }
+}
+Pedestrian {
+  translation 387.56 0.59 -364.59
 }

@@ -1,17 +1,40 @@
 import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 import { ReactSortable } from "react-sortablejs";
 
 class Task extends Component {
   state = {
+    robots: this.props.state.robots,
     list: this.props.state.missions[this.props.state.selectedMission].tasks
   }
 
   componentWillReceiveProps(nextProps) {
     this.setState({
+      robots: nextProps.state.robots,
       list: nextProps.state.missions[nextProps.state.selectedMission].tasks
     });
+  }
+
+  robotsThatCanExecute(task) {
+    let select = [<option> {"--"} </option>]
+    let robots = this.state.robots
+    let target = task.simpleactions.length
+    
+    Object.keys(robots).forEach(robot => {
+      let saCount = 0
+      robots[robot].simpleactions.forEach(simpleaction => {
+        for (let sa in task.simpleactions) {
+          if (task.simpleactions[sa].name === simpleaction.name){
+            saCount = saCount + 1
+          }
+        }
+      })
+      
+      if (saCount === target)
+        select.push(<option> {robot} </option>)
+    })
+    return select
   }
 
   render() {
@@ -35,6 +58,16 @@ class Task extends Component {
               >
                 {task.name}
               </Button>
+
+              <Form>
+                  <Form.Control
+                    as="select"
+                    value={task.robot ? task.robot : "--"}
+                    onChange={this.props.handleTaskAllocationChange(task)}
+                    style={{ marginLeft: "5px", width: "120px" }}>
+                    {this.robotsThatCanExecute(task)}
+                  </Form.Control>
+                </Form>
 
               <Button
                 style={{ marginLeft: "5px" }}

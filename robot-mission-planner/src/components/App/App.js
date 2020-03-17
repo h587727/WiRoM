@@ -83,22 +83,26 @@ class App extends Component {
 
     //Loop through all simpleactions and add them in order to each robot
     tasks.forEach(task => {
-      task.simpleactions.forEach(simpleaction => {
-        let robot = simpleaction.robot
-        let newSimpleactions = []
+      let robot = task.robot
+      if (robot !== "--") {
+        task.simpleactions.forEach(simpleaction => {
+          console.log(robot)
+          let newSimpleactions = []
 
-        if (robot in newMission) {
-          newSimpleactions = newMission[robot].simpleactions
-          simpleaction.id = newSimpleactions.length
-        }
-        else {
-          newMission[robot] = { port: robots[robot]["port"], language: robots[robot]["language"] }
-          simpleaction.id = 0
-        }
+          if (robot in newMission) {
+            newSimpleactions = newMission[robot].simpleactions
+            simpleaction.id = newSimpleactions.length
+          }
+          
+          else {
+            newMission[robot] = { port: robots[robot]["port"], language: robots[robot]["language"] }
+            simpleaction.id = 0
+          }
 
-        newSimpleactions.push(simpleaction)
-        newMission[robot].simpleactions = newSimpleactions
-      })
+          newSimpleactions.push(simpleaction)
+          newMission[robot].simpleactions = newSimpleactions
+        })
+      }
     })
     this.setState({ currentMission: newMission })
     console.log(this.state)
@@ -110,7 +114,8 @@ class App extends Component {
 
     for (let robot in this.state.robots) {
       this.state.robots[robot].simpleactions.forEach(sa => {
-        availableSimpleactions.push({ "name": sa.name, "robot": robot, "numArgs": sa.numArgs, "type": sa.type })
+          sa.robot = robot
+          availableSimpleactions.push(sa)
       })
     }
     this.setState({ availableSimpleactions: availableSimpleactions })
@@ -154,24 +159,22 @@ class App extends Component {
   }
 
   //Handle state for when user changes robot for a simpleaction
-  handleSimpleactionRobotChange = sa => event => {
+  handleTaskAllocationChange = task => event => {
     let tasks = this.state.missions[this.state.selectedMission].tasks
-    let newSa = sa
-    tasks.forEach(task => {
-      task.simpleactions.forEach(simpleaction => {
-        if (simpleaction === sa) {
-          newSa = simpleaction
-          newSa.robot = event.target.value
-        }
-      })
+    let newTask = {}
+    tasks.forEach(t => {
+      if (task === t) {
+        newTask = t
+        newTask.robot = event.target.value
+      }
     })
-    this.setState({ sa: newSa })
+    this.setState({ task: newTask })
     this.handleMissionChange()
   }
 
   handleAddNewTask = taskName => event => {
     let mission = this.state.missions[this.state.selectedMission]
-    mission.tasks.push({ "name": taskName, "id": mission.tasks.length, simpleactions: [] })
+    mission.tasks.push({ "name": taskName, "id": mission.tasks.length, simpleactions: [], robot: "--"})
     this.setState({ selectedTask: taskName })
     this.setState({ mission: mission })
 
@@ -184,7 +187,7 @@ class App extends Component {
     let tasks = this.state.missions[this.state.selectedMission].tasks
     tasks.forEach(task => {
       if (task.name === this.state.selectedTask)
-        task.simpleactions.push({ "name": sa.name, "args": "", "robot": sa.robot })
+        task.simpleactions.push({ "name": sa.name, "args": ""})
       tasks[tasks.indexOf(task)] = task
     })
     this.setState({ tasks: tasks })
@@ -230,7 +233,7 @@ class App extends Component {
         if (newState > task.simpleactions) {
           newState.forEach(sa => {
             if (!task.simpleactions.includes(sa)) {
-              newState[newState.indexOf(sa)] = { "name": sa.name, "args": "", "robot": this.state.selectedRobot, "id": (newState.length - 1) }
+              newState[newState.indexOf(sa)] = { "name": sa.name, "args": "", "id": (newState.length - 1) }
             }
           })
         }
@@ -266,6 +269,7 @@ class App extends Component {
       let missions = this.state.missions
       missions[this.state.selectedMission].tasks = res
       this.setState({missions: missions})
+      this.handleMissionChange();
     })
     event.preventDefault();
   }
@@ -293,13 +297,14 @@ class App extends Component {
               </div>
 
               <Row>
-                <Col xs={4}>
+                <Col xs={6}>
                   <div className="shadow p-3 mb-5 bg-white rounded">
                     <Task
                       state={this.state}
                       handleTaskClick={(currentMission) => this.handleTaskClick(currentMission)}
                       handleRemoveTask={(task) => this.handleRemoveTask(task)}
-                      handleTaskSortable={(newState) => this.handleTaskSortable(newState)}>
+                      handleTaskSortable={(newState) => this.handleTaskSortable(newState)}
+                      handleTaskAllocationChange={(task) => this.handleTaskAllocationChange(task)}>
                     </Task>
 
                     <NewTask state={this.state} handleAddNewTask={(taskName) => this.handleAddNewTask(taskName)} print={() => this.print()}>
@@ -307,7 +312,7 @@ class App extends Component {
                   </div>
                 </Col>
 
-                <Col xs={8}>
+                <Col xs={6}>
                   {
                     this.state.selectedTask === "" ? <div></div> :
                       <div className="shadow p-3 mb-5 bg-white rounded">

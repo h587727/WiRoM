@@ -6,46 +6,58 @@ import { ReactSortable } from "react-sortablejs";
 class Simpleaction extends Component {
   state = {
     robots: this.props.state.robots,
+    selectedRobot: this.getRobot(this.props.state.missions[this.props.state.selectedMission], this.props.state.selectedTask),
     list: this.getSimpleactions(this.props.state.missions[this.props.state.selectedMission], this.props.state.selectedTask)
   }
 
   componentWillReceiveProps(nextProps) {
     this.setState({
       robots: nextProps.state.robots,
+      selectedRobot: this.getRobot(nextProps.state.missions[nextProps.state.selectedMission], nextProps.state.selectedTask),
       list: this.getSimpleactions(nextProps.state.missions[nextProps.state.selectedMission], nextProps.state.selectedTask)
     });
   }
 
-  findRobotsWithSimpleaction(sa) {
-    let select = []
-    let robots = this.state.robots
-    Object.keys(robots).forEach(robot => {
-      robots[robot].simpleactions.forEach(simpleaction => {
-        if (sa.name === simpleaction.name)
-          select.push(<option> {robot} </option>)
-      })
-    })
-    return select
-  }
-
   printNumSequence(sa) {
     let num = (sa.id + 1)
-    this.state.robots[sa.robot].simpleactions.forEach(simpleaction => {
-      if (simpleaction.name === sa.name)
-        if (simpleaction.type === "notify" || simpleaction.type === "wait")
-          num = (sa.id + 1) + "*"
-    })
-    return num
+    let robots = this.state.robots
+    let selectedRobot = this.state.selectedRobot
+
+    if (selectedRobot !== "--") {
+      robots[selectedRobot].simpleactions.forEach(simpleaction => {
+        if (simpleaction.name === sa.name)
+          if (simpleaction.type === "notify" || simpleaction.type === "wait")
+            num = (sa.id + 1) + "*"
+      })
+      return num
+    }
+    return "-"
   }
 
   simpleactionNoArguments(sa) {
     let noArgs = false
-    this.state.robots[sa.robot].simpleactions.forEach(simpleaction => {
-      if (sa.name === simpleaction.name)
-        if (simpleaction.numArgs === 0)
-          noArgs = true
-    })
+    let robots = this.state.robots
+    let selectedRobot = this.state.selectedRobot
+
+    if (selectedRobot !== "--") {
+      robots[selectedRobot].simpleactions.forEach(simpleaction => {
+        if (sa.name === simpleaction.name)
+          if (simpleaction.numArgs === 0)
+            noArgs = true
+      })
+    }
     return noArgs
+  }
+
+  getRobot(mission, selectedTask) {
+    let robot = ""
+
+    mission.tasks.forEach(task => {
+      if (task.name === selectedTask) {
+        robot = task.robot
+      }
+    })
+    return robot
   }
 
   getSimpleactions(mission, selectedTask) {
@@ -94,16 +106,6 @@ class Simpleaction extends Component {
                         onChange={this.props.handleSimpleactionArgsChange(sa)}>
                       </Form.Control>
                     }
-                  </Form>
-
-                  <Form>
-                    <Form.Control
-                      as="select"
-                      value={sa.robot}
-                      onChange={this.props.handleSimpleactionRobotChange(sa)}
-                      style={{ marginLeft: "5px", width: "120px" }}>
-                      {this.findRobotsWithSimpleaction(sa)})}
-                    </Form.Control>
                   </Form>
 
                   <Button style={{ marginLeft: "5px" }} onClick={this.props.handleRemoveSimpleaction(sa)} variant="outline-danger">
