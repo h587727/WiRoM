@@ -22,8 +22,6 @@ right_motors = [robot.getMotor(name) for name in right_motor_names]
 left_speed = 0
 right_speed = 0 
 
-
-
 gps = robot.getGPS('gps')
 compass = robot.getCompass('compass')
 gps.enable(timestep)
@@ -131,11 +129,22 @@ def receive_location_from_robot():
     while not location:
         time.sleep(1)
 
+#write the location of this robot to the config file
+def setLocationConfig():
+    with open('../config.json') as json_data_file:
+        data = json.load(json_data_file)
+
+    with open('../config.json', 'w') as json_data_file:    
+        data['robots']['moose']['location'] = {"x": gps.getValues()[0], "y": gps.getValues()[2]}
+        json.dump(data, json_data_file, indent=2, sort_keys=True)
+
+
 def moose_main():
     for motor in left_motors:
         motor.setPosition(float('inf'))
     for motor in right_motors:
         motor.setPosition(float('inf'))
+
 
     while robot.step(timestep) != -1:
         if navigate:

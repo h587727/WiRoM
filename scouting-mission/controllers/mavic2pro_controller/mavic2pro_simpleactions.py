@@ -201,13 +201,21 @@ def stabilize_and_control_movement():
     rear_left_motor.setVelocity(-rear_left_motor_input)
     rear_right_motor.setVelocity(rear_right_motor_input)
 
+#write the location of this robot to the config file
+def setLocationConfig():
+    with open('../config.json') as json_data_file:
+        data = json.load(json_data_file)
+
+    with open('../config.json', 'w') as json_data_file:    
+        data['robots']['mavic2pro']['location'] = {"x": gps.getValues()[0], "y": gps.getValues()[2]}
+        json.dump(data, json_data_file, indent=2, sort_keys=True)
+
 
 # main loop, starting and controlling the robot based on the global variables
 def mavic2pro_main():
     global recognise
     global navigate
     global rec_obj_pos
-
 
     for motor in motors:
         motor.setPosition(float('inf'))

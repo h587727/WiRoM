@@ -1,0 +1,129 @@
+{
+  "robots": {
+    "mavic2pro": {
+      "language": "python",
+      "location": {
+        "x": 408.1075898997235,
+        "y": -401.3823849090494
+      },
+      "port": "5001",
+      "simpleactions": [
+        {
+          "name": "set_altitude",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 1
+        },
+        {
+          "name": "go_forward",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 0.95
+        },
+        {
+          "name": "go_backward",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 0.95
+        },
+        {
+          "name": "turn_right",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 0.95
+        },
+        {
+          "name": "turn_left",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 0.95
+        },
+        {
+          "name": "recognise_objects",
+          "numArgs": 0,
+          "type": "set_property",
+          "utility": 1
+        },
+        {
+          "name": "go_to_location",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 0.95
+        },
+        {
+          "name": "set_message_target",
+          "numArgs": 1,
+          "type": "set_property",
+          "utility": 1
+        },
+        {
+          "name": "send_location",
+          "numArgs": 0,
+          "type": "notify",
+          "utility": 1
+        },
+        {
+          "name": "stop_movement",
+          "numArgs": 0,
+          "type": "move",
+          "utility": 1
+        }
+      ]
+    },
+    "moose": {
+      "language": "python",
+      "location": {
+        "x": 407.68160196729383,
+        "y": -398.1846088412057
+      },
+      "port": "5002",
+      "simpleactions": [
+        {
+          "name": "go_forward",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 0.94
+        },
+        {
+          "name": "go_backward",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 0.94
+        },
+        {
+          "name": "turn_right",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 0.94
+        },
+        {
+          "name": "turn_left",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 0.94
+        },
+        {
+          "name": "go_to_location",
+          "numArgs": 1,
+          "type": "move",
+          "utility": 0.94
+        },
+        {
+          "name": "stop_movement",
+          "numArgs": 0,
+          "type": "move",
+          "utility": 1
+        },
+        {
+          "name": "receive_location_from_robot",
+          "numArgs": 0,
+          "type": "wait",
+          "utility": 1
+        }
+      ]
+    }
+  },
+  "world": {
+    "file": "scouting-mission.wbt"
+  }
+}}
