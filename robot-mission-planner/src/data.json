@@ -93,11 +93,23 @@
                 },
                 {
                     "name":"Receive and go to location", 
-                    "id": "2", 
+                    "id": 2, 
                     "robot":"moose", 
                     "simpleactions":[
                         {"name":"receive_location_from_robot", "args":"", "id":0}, 
                         {"name":"go_to_location", "args":"[]", "id":1}
+                    ]
+                }
+            ]
+        },
+        "Play football": {
+            "tasks": [
+                {
+                    "name": "Kick ball",
+                    "id": 0,
+                    "robot":"mavic2pro", 
+                    "simpleactions":[
+                        {"name":"go_forward", "args":"10", "id":0}
                     ]
                 }
             ]
