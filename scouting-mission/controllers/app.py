@@ -72,7 +72,8 @@ def bid_by_utility(robots, tasks, bids):
             for simpleaction in task["simpleactions"]:
                 for robotSimpleaction in robots[robot]["simpleactions"]:
                     if robotSimpleaction["name"] == simpleaction["name"]:
-                        bid = bid * robotSimpleaction["utility"]
+                        utility = robotSimpleaction["quality"] - robotSimpleaction["cost"]
+                        bid = bid * utility
                         if robotSimpleaction["name"] == "go_to_location" and simpleaction["args"] != "[]":
                             loc = robots[robot]["location"]
                             # change this when structure of args is changed
@@ -85,7 +86,7 @@ def bid_by_utility(robots, tasks, bids):
                             else:
                                 bid = bid * 0.1
                         bids[task["name"]][robot] = bid
-
+    print(bids)
     return bids
 
 

@@ -12,61 +12,71 @@
           "name": "set_altitude",
           "numArgs": 1,
           "type": "move",
-          "utility": 1
+          "quality": 1,
+          "cost": 0.01
         },
         {
           "name": "go_forward",
           "numArgs": 1,
           "type": "move",
-          "utility": 0.95
+          "quality": 0.975,
+          "cost": 0.1
         },
         {
           "name": "go_backward",
           "numArgs": 1,
           "type": "move",
-          "utility": 0.95
+          "quality": 0.975,
+          "cost": 0.1
         },
         {
           "name": "turn_right",
           "numArgs": 1,
           "type": "move",
-          "utility": 0.95
+          "quality": 0.975,
+          "cost": 0.1
         },
         {
           "name": "turn_left",
           "numArgs": 1,
           "type": "move",
-          "utility": 0.95
+          "quality": 0.975,
+          "cost": 0.1
         },
         {
           "name": "recognise_objects",
           "numArgs": 0,
           "type": "set_property",
-          "utility": 1
+          "quality": 1,
+          "cost": 0
         },
         {
           "name": "go_to_location",
           "numArgs": 1,
           "type": "move",
-          "utility": 0.95
+          "quality": 0.975,
+          "cost": 0.5
         },
         {
           "name": "set_message_target",
           "numArgs": 1,
           "type": "set_property",
-          "utility": 1
+          "quality": 1,
+          "cost": 0
         },
         {
           "name": "send_location",
           "numArgs": 0,
           "type": "notify",
-          "utility": 1
+          "quality": 1,
+          "cost": 0
         },
         {
           "name": "stop_movement",
           "numArgs": 0,
           "type": "move",
-          "utility": 1
+          "quality": 1,
+          "cost": 0
         }
       ]
     },
@@ -82,43 +92,50 @@
           "name": "go_forward",
           "numArgs": 1,
           "type": "move",
-          "utility": 0.94
+          "quality": 0.9,
+          "cost": 0.05
         },
         {
           "name": "go_backward",
           "numArgs": 1,
           "type": "move",
-          "utility": 0.94
+          "quality": 0.9,
+          "cost": 0.05
         },
         {
           "name": "turn_right",
           "numArgs": 1,
           "type": "move",
-          "utility": 0.94
+          "quality": 0.90,
+          "cost": 0.05
         },
         {
           "name": "turn_left",
           "numArgs": 1,
           "type": "move",
-          "utility": 0.94
+          "quality": 0.9,
+          "cost": 0.05
         },
         {
           "name": "go_to_location",
           "numArgs": 1,
           "type": "move",
-          "utility": 0.94
+          "quality": 0.9,
+          "cost": 0.25
         },
         {
           "name": "stop_movement",
           "numArgs": 0,
           "type": "move",
-          "utility": 1
+          "quality": 1,
+          "cost": 0
         },
         {
           "name": "receive_location_from_robot",
           "numArgs": 0,
           "type": "wait",
-          "utility": 1
+          "quality": 1,
+          "cost": 0
         }
       ]
     }
