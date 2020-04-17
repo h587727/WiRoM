@@ -15,12 +15,14 @@ robot = Robot()
 # get the time step of the current world.
 timestep = int(robot.getBasicTimeStep())
 
-left_motor_names = ["left motor 1",  "left motor 2",  "left motor 3",  "left motor 4"] 
-right_motor_names = ["right motor 1", "right motor 2", "right motor 3", "right motor 4"]
+left_motor_names = ["left motor 1",  "left motor 2",
+                    "left motor 3",  "left motor 4"]
+right_motor_names = ["right motor 1",
+                     "right motor 2", "right motor 3", "right motor 4"]
 left_motors = [robot.getMotor(name) for name in left_motor_names]
 right_motors = [robot.getMotor(name) for name in right_motor_names]
 left_speed = 0
-right_speed = 0 
+right_speed = 0
 
 gps = robot.getGPS('gps')
 compass = robot.getCompass('compass')
@@ -32,12 +34,14 @@ navigate = False
 location = []
 simpleactions = []
 
+
 def init(port):
     main = threading.Thread(target=moose_main)
     execute = threading.Thread(target=execute_simpleactions)
     main.start()
     execute.start()
     app.run(port=port)
+
 
 def go_forward(duration):
     global left_speed
@@ -48,6 +52,7 @@ def go_forward(duration):
         time.sleep(duration)
         left_speed = 0
         right_speed = 0
+
 
 def go_backward(duration):
     global left_speed
@@ -70,6 +75,7 @@ def turn_left(duration):
         left_speed = 0
         right_speed = 0
 
+
 def turn_right(duration):
     global left_speed
     global right_speed
@@ -80,15 +86,17 @@ def turn_right(duration):
         left_speed = 0
         right_speed = 0
 
+
 def go_to_location(target):
     global location
     global navigate
     if not location and target:
         location = target
-    
+
     navigate = True
     while navigate:
         time.sleep(1)
+
 
 def stop_movement():
     global left_speed
@@ -96,14 +104,17 @@ def stop_movement():
     left_speed = 0
     right_speed = 0
 
+
 def navigate_to_location():
     global navigate
+    global location
+    loc = location[0]
 
     pos = gps.getValues()
     north = compass.getValues()
     front = [-north[0], north[1], north[2]]
 
-    dir = [location[0] - pos[0], location[1] - pos[2]]
+    dir = [loc[0] - pos[0], loc[1] - pos[2]]
     distance = math.sqrt(dir[0] * dir[0] + dir[1] * dir[1])
 
     # calculate the angle of which the vehicle is supposed to go to reach target
@@ -111,31 +122,34 @@ def navigate_to_location():
     if angle < 0:
         angle += 2 * math.pi
 
-    # vehicle is on the right path when angle ≈ math.pi 
+    # vehicle is on the right path when angle ≈ math.pi
     if angle < math.pi - 0.01:
         turn_left(0)
     elif angle > math.pi + 0.01:
         turn_right(0)
     else:
         go_forward(0)
-        
-    # stop vehicle and navigation when target has been reached 
+
+    # stop vehicle and navigation when target has been reached
     if distance < 1:
         print('Reached target')
         navigate = False
+        location.pop(0)
         stop_movement()
+
 
 def receive_location_from_robot():
     while not location:
         time.sleep(1)
 
-#write the location of this robot to the config file
+# write the location of this robot to the config file
 def setLocationConfig():
     with open('../config.json') as json_data_file:
         data = json.load(json_data_file)
 
-    with open('../config.json', 'w') as json_data_file:    
-        data['robots']['moose']['location'] = {"x": gps.getValues()[0], "y": gps.getValues()[2]}
+    with open('../config.json', 'w') as json_data_file:
+        data['robots']['moose']['location'] = {
+            "x": gps.getValues()[0], "y": gps.getValues()[2]}
         json.dump(data, json_data_file, indent=2, sort_keys=True)
 
 
@@ -145,7 +159,6 @@ def moose_main():
     for motor in right_motors:
         motor.setPosition(float('inf'))
 
-
     while robot.step(timestep) != -1:
         if navigate:
             navigate_to_location()
@@ -154,24 +167,26 @@ def moose_main():
         for motor in right_motors:
             motor.setVelocity(right_speed)
 
-@app.route('/simpleactions', methods = ['POST'])
+
+@app.route('/simpleactions', methods=['POST'])
 def receive_simpleactions():
     global simpleactions
     simpleactions = request.get_json()
     return "Updated simple actions", 200
 
-@app.route('/location', methods = ['POST'])
+
+@app.route('/location', methods=['POST'])
 def receive_location():
     global location
     msg = request.get_json()
-    location = msg['location']
+    location.append(msg['location'])
     return "Received location", 200
+
 
 def execute_simpleactions():
     global simpleactions
     while robot.step(timestep) != -1:
         if simpleactions:
-            print("Test")
             action = simpleactions.pop(0)
             print(action)
             eval(action)

@@ -77,8 +77,8 @@ def bid_by_utility(robots, tasks, bids):
                             loc = robots[robot]["location"]
                             # change this when structure of args is changed
                             target = {"x": 388, "y": -365}
-                            distance = abs(
-                                loc["x"] - target["x"] + loc["y"] - target["y"])
+                            distance = abs(loc["x"] - target["x"] + loc["y"] - target["y"])
+
                             distNorm = (1 - distance/100)
                             if distNorm > 0.1:
                                 bid = bid * distNorm
@@ -91,16 +91,16 @@ def bid_by_utility(robots, tasks, bids):
 
 def allocate_tasks_to_highest_bidder(tasks, bids):
     for bid in bids:
-        chosen = '--'
+        highest_bidder = '--'
         for robot in bids[bid]:
-            if chosen == '--' and bids[bid][robot] > 0:
-                chosen = robot
-            elif chosen != '--' and bids[bid][robot] > bids[bid][chosen]:
-                chosen = robot
+            if highest_bidder == '--' and bids[bid][robot] > 0:
+                highest_bidder = robot
+            elif highest_bidder != '--' and bids[bid][robot] > bids[bid][highest_bidder]:
+                highest_bidder = robot
 
         for task in tasks:
             if task["name"] == bid:
-                task["robot"] = chosen
+                task["robot"] = highest_bidder
 
     return tasks
 
