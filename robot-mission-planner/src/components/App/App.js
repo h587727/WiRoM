@@ -271,6 +271,7 @@ class App extends Component {
       this.setState({missions: missions})
       this.handleMissionChange();
     })
+    
     event.preventDefault();
   }
 

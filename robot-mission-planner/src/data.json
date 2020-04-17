@@ -32,6 +32,39 @@
     },
     
     "missions": {
+        "Quarantine delivery": { 
+            "tasks": [
+                {
+                    "name":"Scout neighborhood", 
+                    "id": 0,
+                    "robot":"mavic2pro",
+                    "simpleactions":[
+                        {"name":"set_altitude", "args":"3", "id":0}, 
+                        {"name":"recognise_objects", "args":"", "id":1}, 
+                        {"name":"set_message_target", "args":"'moose'", "id":2}, 
+                        {"name":"go_to_location", "args":"[402, -374]", "id":3},
+                        {"name":"send_location", "args":"", "id":4},
+                        {"name":"go_to_location", "args":"[377, -374]", "id":5},
+                        {"name":"send_location", "args":"", "id":6},
+                        {"name":"go_to_location", "args":"[347, -374]", "id":7},
+                        {"name":"send_location", "args":"", "id":8}
+                    ]
+                },
+                {
+                    "name":"Receive and go to location", 
+                    "id": 1,
+                    "robot":"moose", 
+                    "simpleactions":[
+                        {"name":"receive_location_from_robot", "args":"", "id":0}, 
+                        {"name":"go_to_location", "args":"[]", "id":1},
+                        {"name":"receive_location_from_robot", "args":"", "id":2}, 
+                        {"name":"go_to_location", "args":"[]", "id":3},
+                        {"name":"receive_location_from_robot", "args":"", "id":4}, 
+                        {"name":"go_to_location", "args":"[]", "id":5}
+                    ]
+                }
+            ]
+        },
         "Scout location and deliver item": { 
             "tasks": [
                 {
@@ -139,6 +172,6 @@
         }
     },
     "defaultSelectedRobot": "mavic2pro",                
-    "defaultSelectedMission": "Scout location and deliver item",   
-    "defaultSelectedTask": "Scout location"         
+    "defaultSelectedMission": "Quarantine delivery",   
+    "defaultSelectedTask": "Scout neighborhood"         
 }
