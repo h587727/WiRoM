@@ -7,8 +7,8 @@ WorldInfo {
   }
 }
 Viewpoint {
-  orientation -0.014493000052637506 0.9977909265449214 0.06483224393850512 2.607586984532383
-  position 412.19730387078346 1.4860549891640709 -409.62900849549715
+  orientation -0.0011468764568116916 0.999859450684186 0.016726133800447653 2.626823100457968
+  position 415.4646579742027 2.531706321942215 -414.95732249625553
   follow "moose"
 }
 TexturedBackground {
@@ -23,6 +23,17 @@ UnevenTerrain {
     }
   }
   textureScale 4 4
+}
+SimpleTwoFloorsHouse {
+  translation 377.6 -0.68 -363.59
+}
+SimpleTwoFloorsHouse {
+  translation 403.75 -0.68 -363.59
+  name "simple two-storey house(1)"
+}
+SimpleTwoFloorsHouse {
+  translation 346.82 -0.68 -363.59
+  name "simple two-storey house(2)"
 }
 SolidBox {
   translation 407.28 -0.54 -401.17
@@ -56,6 +67,41 @@ SolidBox {
   physics Physics {
     mass 1
   }
+}
+AdvertisingBoard {
+  translation 402.109 -0.71 -374.23
+  rotation 0 -1 0 -1.5708053071795867
+  frontTexture [
+    "textures/carpet.jpg"
+  ]
+  backTexture [
+    "textures/carpet.jpg"
+  ]
+  displayWidth 1
+  displayHeight 1
+  frameThickness 0.3
+  frameColor 0.886269 0.886275 0.886275
+  poleNumber 1
+  poleHeight 3
+  poleThickness 0.2
+}
+AdvertisingBoard {
+  translation 376.909 -0.71 -374.23
+  rotation 0 -1 0 -1.5708053071795867
+  name "advertising board(1)"
+  frontTexture [
+    "textures/carpet.jpg"
+  ]
+  backTexture [
+    "textures/carpet.jpg"
+  ]
+  displayWidth 1
+  displayHeight 1
+  frameThickness 0.3
+  frameColor 0.886269 0.886275 0.886275
+  poleNumber 1
+  poleHeight 3
+  poleThickness 0.2
 }
 SoccerBall {
   translation 406.497 0.0048988 -400.953
