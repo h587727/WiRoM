@@ -68,7 +68,7 @@ To open in streaming mode on Mac, open a new terminal and navigate to the instal
 ```
 This should open a new Webots instance, and it might ask for permission to access the web.
 
-To open in streaming mode on Windows, also navigate to the bin folder in the installation folder, typically C:\Users\"username"\AppData\Local\Programs\Webots\msys64\mingw64\bin and run the program from a terminal using the command:
+To open in streaming mode on Windows, also navigate to the bin folder in the installation folder, typically *C:\Users\\"username"\AppData\Local\Programs\Webots\msys64\mingw64\bin* and run the program from a terminal using the command:
 ```
 ./webots.exe --stream
 ```
