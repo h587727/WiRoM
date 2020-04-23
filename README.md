@@ -47,7 +47,7 @@ Open another new terminal window and navigate into the repository folder, then t
 ```
 cd Multi-robot-mission-planner/scouting-mission/controllers
 ```
-First run the following command to install all packaged (listed in requirements.txt): 
+First run the following command to install all packages (listed in requirements.txt): 
 ```
 pip install -r requirements.txt
 ```
@@ -66,12 +66,12 @@ To open in streaming mode on Mac, open a new terminal and navigate to the instal
 ```
 ./webots --stream
 ```
-This should open a new Webots instance, and it might ask for permission to access the web.
 
 To open in streaming mode on Windows, also navigate to the bin folder in the installation folder, typically *C:\Users\\"username"\AppData\Local\Programs\Webots\msys64\mingw64\bin* and run the program from a terminal using the command:
 ```
 ./webots.exe --stream
 ```
+This should open a new Webots instance, and it might ask for permission to access the web.
 
 For the official documentation on how to start Webots normally and in streaming mode for Windows, Mac and Linux go to: https://cyberbotics.com/doc/guide/starting-webots
 
