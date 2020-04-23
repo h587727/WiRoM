@@ -1,11 +1,19 @@
 # Multi-robot-mission-planner
 
 ## Pre-requirements
-To use the system as-is, one needs to download and install the robot simulaton tool Webots. Webots is a powerful and open-source robot simulation tool that provides a big robot repository and possibilty for having multi-robot setups and create controllers for different robots, as well as streaming to a web platform.
+To use the system as-is, one needs to download and install the LATEST VERSION of the robot simulaton tool Webots. Webots is a powerful and open-source robot simulation tool that provides a big robot repository and possibilty for having multi-robot setups and create controllers for different robots, as well as streaming to a web platform.
 
 Go to Cyberbotics website to find instructions on how to download and install Webots: https://cyberbotics.com/
 
 One could use another simulation if desired, but then one would need to program the controllers and add simpleactions for that simulation tool, in order for it to work.
+
+You also need to have Python and Node.js installed, with their respective package commands pip and npm.
+
+Node.js / npm : https://nodejs.org/en/
+
+Python / pip : https://www.python.org/downloads/
+
+It is also highly recommended to have some bash-like terminal (e.g. https://gitforwindows.org/) installed if you use Windows, because the commands given in this readme will be compatible with those types of terminals.
 
 ## How to run the system from the GitHub repository
 Clone the repository to your local machine using the command: 
@@ -23,7 +31,11 @@ Open a new terminal and navigate into the repository folder, then the robot-miss
 ```
 cd Multi-robot-mission-planner/robot-mission-planner/src
 ```
-Then run the following command: 
+First run the following command to install all packages:
+```
+npm install
+```
+Then run the following command to start the client: 
 ```
 npm start
 ```
@@ -35,7 +47,11 @@ Open another new terminal window and navigate into the repository folder, then t
 ```
 cd Multi-robot-mission-planner/scouting-mission/controllers
 ```
-Then run the following command: 
+First run the following command to install all packaged (listed in requirements.txt): 
+```
+pip install -r requirements.txt
+```
+Then run the following command to start the server: 
 ```
 flask run
 ```
@@ -52,7 +68,10 @@ To open in streaming mode on Mac, open a new terminal and navigate to the instal
 ```
 This should open a new Webots instance, and it might ask for permission to access the web.
 
-To open in streaming mode on Windows, also navigate to the bin folder in the installation folder, typically C:\Program Files\Webots\msys64\mingw64\bin and run the program from command line using the *--stream* argument
+To open in streaming mode on Windows, also navigate to the bin folder in the installation folder, typically C:\Users\"username"\AppData\Local\Programs\Webots\msys64\mingw64\bin and run the program from a terminal using the command:
+```
+./webots.exe --stream
+```
 
 For the official documentation on how to start Webots normally and in streaming mode for Windows, Mac and Linux go to: https://cyberbotics.com/doc/guide/starting-webots
 
