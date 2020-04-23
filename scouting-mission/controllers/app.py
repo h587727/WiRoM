@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import json
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -27,8 +28,17 @@ def make_controller():
         print(mission[robot]['port'])
         print(mission[robot]['language'])
         print(sequence)
-        requests.post('http://localhost:' +
-                      mission[robot]['port'] + '/simpleactions', json=sequence)
+        success = False
+        retries = 0
+        while not success or retries is 60:
+            try:
+                requests.post('http://localhost:' + mission[robot]['port'] + '/simpleactions', json=sequence)
+                success = True
+            except Exception as e:
+                print(e)
+                retries += 1
+                print('Retry: ' + str(retries) + '...')
+                time.sleep(1)
 
     return 'Controllers successfully created', 200
 
@@ -112,4 +122,4 @@ def ping():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(processes='5')

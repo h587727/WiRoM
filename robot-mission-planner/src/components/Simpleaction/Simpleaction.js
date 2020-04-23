@@ -38,8 +38,16 @@ class Simpleaction extends Component {
     let noArgs = false
     let robots = this.state.robots
     let selectedRobot = this.state.selectedRobot
-
-    if (selectedRobot !== "--") {
+    if (selectedRobot === "--"){
+      for (let robot in robots){
+        robots[robot].simpleactions.forEach(simpleaction => {
+          if (sa.name === simpleaction.name)
+            if (simpleaction.numArgs === 0)
+              noArgs = true
+        })
+      }
+    }
+    else {
       robots[selectedRobot].simpleactions.forEach(simpleaction => {
         if (sa.name === simpleaction.name)
           if (simpleaction.numArgs === 0)
@@ -101,7 +109,7 @@ class Simpleaction extends Component {
                         onChange={this.props.handleSimpleactionArgsChange(sa)}>
                       </Form.Control>
                       :
-                      <Form.Control as="input" style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
+                      <Form.Control as="input" required style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
                         value={sa.args}
                         onChange={this.props.handleSimpleactionArgsChange(sa)}>
                       </Form.Control>

@@ -257,20 +257,29 @@ class App extends Component {
 
   //Submit the mission and send it to the backend
   handleSubmitMission = event => {
-    sendMission(this.state);
-    event.preventDefault();
+    if(validateMission(this.state)) {
+      sendMission(this.state);
+      event.preventDefault();
+    }
+    else
+      alert('Mission is not valid')
   } 
-  
+
   //Send the mission to the backend to perform automatic task allocation
   //The new task allocation is returned in the response of the request and updated here
   handleSubmitTaskAllocation = event => {
     let response = sendTaskAllocation(this.state);
-    response.then(res => {
-      let missions = this.state.missions
-      missions[this.state.selectedMission].tasks = res
-      this.setState({missions: missions})
-      this.handleMissionChange();
-    })
+    response
+      .then(res => {
+        if (res === undefined)
+          throw 'Could not connect to server'
+        
+        let missions = this.state.missions
+        missions[this.state.selectedMission].tasks = res
+        console.log(res)
+        this.setState({missions: missions})
+        this.handleMissionChange();})
+      .catch(console.log)
     
     event.preventDefault();
   }
@@ -370,6 +379,25 @@ class App extends Component {
   }
 }
 
+function validateMission(state) {
+  let mission = state.currentMission
+  let robots = state.robots
+  let isValid = true
+
+  for (let robot in mission){
+    mission[robot].simpleactions.forEach(simpleaction => {
+      robots[robot].simpleactions.forEach(sa => {
+        if (sa.name === simpleaction.name){
+          if (sa.numArgs !== 0 && simpleaction.args.length === 0)
+            isValid = false
+        }
+      })
+    })
+  }
+  return isValid
+}
+
+
 function sendTaskAllocation(state) {
   console.log('Sending request')
   let res = fetch('http://localhost:5000/allocate', {
@@ -380,7 +408,7 @@ function sendTaskAllocation(state) {
     },
     body: JSON.stringify(state.missions[state.selectedMission].tasks)
   })
-    .then(res => {console.log(res); return res.json()})
+    .then(res => {return res.json()})
     .catch(console.log)
   return res
 }
