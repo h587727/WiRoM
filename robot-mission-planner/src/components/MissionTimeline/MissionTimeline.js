@@ -79,9 +79,6 @@ class MissionTimeline extends Component {
                         if (availSa.type === "notify") {
                             notifyNodes.push({ name: sa.name, x: x, y: y })
                         }
-                        console.log(waitNodes)
-                        console.log(notifyNodes)
-                        console.log(waitNodes.length > 0 && notifyNodes.length > 0)
                         if (waitNodes.length > 0 && notifyNodes.length > 0) {
                             let waitNode = waitNodes.shift()
                             let notifyNode = notifyNodes.shift()

@@ -146,7 +146,6 @@ class Simpleaction extends Component {
 }
 
 function renderTooltip(info, props) {
-  console.log(info)
   return (
     <Tooltip id="button-tooltip" {...props}>
       {info}

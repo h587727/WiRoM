@@ -22,8 +22,12 @@ def make_controller():
             if simpleaction['args'] is "":
                 sequence.append(simpleaction['name'] + "()")
             else:
-                sequence.append(
-                    simpleaction['name'] + "(" + simpleaction['args'] + ")")
+                if simpleaction['name'] == 'set_message_target':
+                    sequence.append(
+                        simpleaction['name'] + "(" + "'"+ simpleaction['args'] + "'" + ")")
+                else : 
+                    sequence.append(
+                        simpleaction['name'] + "(" + simpleaction['args'] + ")")
 
         print(mission[robot]['port'])
         print(mission[robot]['language'])
