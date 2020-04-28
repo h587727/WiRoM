@@ -74,14 +74,7 @@
                     "simpleactions":[
                         {"name":"set_altitude", "args":"1", "id":0}, 
                         {"name":"recognise_objects", "args":"", "id":1}, 
-                        {"name":"go_to_location", "args":"[388, -365]", "id":2}
-                    ]
-                },
-                {
-                    "name":"Send message", 
-                    "id": 1, 
-                    "robot":"mavic2pro",
-                    "simpleactions":[
+                        {"name":"go_to_location", "args":"[388, -365]", "id":2},
                         {"name":"set_message_target", "args":"'moose'", "id":3}, 
                         {"name":"send_location", "args":"", "id":4}
                     ]
@@ -112,14 +105,7 @@
                         {"name":"turn_left", "args":"3", "id":5},
                         {"name":"go_forward", "args":"30", "id":6},
                         {"name":"turn_left", "args":"3", "id":7},
-                        {"name":"go_forward", "args":"30", "id":8}
-                    ]
-                },
-                {
-                    "name":"Send message", 
-                    "id": 1, 
-                    "robot":"mavic2pro",
-                    "simpleactions":[
+                        {"name":"go_forward", "args":"30", "id":8},
                         {"name":"set_message_target", "args":"'moose'", "id":9}, 
                         {"name":"send_location", "args":"", "id":10}
                     ]
@@ -135,14 +121,26 @@
                 }
             ]
         },
-        "Play football": {
+        "Testmission": {
             "tasks": [
                 {
-                    "name": "Kick ball",
+                    "name": "Test: forward turn",
                     "id": 0,
-                    "robot":"mavic2pro", 
+                    "robot":"--", 
                     "simpleactions":[
-                        {"name":"go_forward", "args":"10", "id":0}
+                        {"name":"go_forward", "args":"10", "id":0},
+                        {"name":"turn_left", "args":"5", "id":0},
+                        {"name":"turn_right", "args":"5", "id":0}
+                    ]
+                },
+                {
+                    "name": "Test: backward turn",
+                    "id": 0,
+                    "robot":"--", 
+                    "simpleactions":[
+                        {"name":"go_backward", "args":"10", "id":0},
+                        {"name":"turn_left", "args":"5", "id":0},
+                        {"name":"turn_right", "args":"5", "id":0}
                     ]
                 }
             ]
