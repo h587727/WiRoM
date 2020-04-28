@@ -64,8 +64,8 @@ class MissionTimeline extends Component {
         let x = 50
         let y = 100
         let data = { nodes: [], links: [] }
-        let waitNode = ""
-        let notifyNode = ""
+        let waitNodes = []
+        let notifyNodes = []
         Object.keys(mission).forEach(robot => {
             data["nodes"].push({ id: robot, x: x, y: y, symbolType: "wye" })
             let prevNode = robot
@@ -74,12 +74,18 @@ class MissionTimeline extends Component {
                 this.state.availableSimpleactions.forEach(availSa => {
                     if (availSa.robot === robot && availSa.name === sa.name) {
                         if (availSa.type === "wait") {
-                            waitNode = { name: sa.name, x: x, y: y }
+                            waitNodes.push({ name: sa.name, x: x, y: y })
                         }
                         if (availSa.type === "notify") {
-                            notifyNode = { name: sa.name, x: x, y: y }
+                            notifyNodes.push({ name: sa.name, x: x, y: y })
                         }
-                        if (notifyNode !== "" && waitNode !== "") {
+                        console.log(waitNodes)
+                        console.log(notifyNodes)
+                        console.log(waitNodes.length > 0 && notifyNodes.length > 0)
+                        if (waitNodes.length > 0 && notifyNodes.length > 0) {
+                            let waitNode = waitNodes.shift()
+                            let notifyNode = notifyNodes.shift()
+                            
                             data["links"].push({
                                 source: nodeName(notifyNode.name, notifyNode.x, notifyNode.y),
                                 target: nodeName(waitNode.name, waitNode.x, waitNode.y)

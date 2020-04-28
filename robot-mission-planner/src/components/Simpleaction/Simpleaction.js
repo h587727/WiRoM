@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Form, ListGroup, ListGroupItem } from 'react-bootstrap';
+import { Button, Form, ListGroup, ListGroupItem, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { ReactSortable } from "react-sortablejs";
 
 class Simpleaction extends Component {
@@ -79,6 +79,18 @@ class Simpleaction extends Component {
     return simpleactions
   }
 
+  getSimpleactionInfo(sa){
+    let robots = this.state.robots
+    let info = "No info"
+    for (let robot in robots){
+      robots[robot].simpleactions.forEach(simpleaction => {
+        if (sa.name === simpleaction.name)
+          info = simpleaction.information
+      })
+    }
+    return info
+  }
+
   render() {
     if (this.state.list === undefined)
       return (<h3>Simpleactions</h3>)
@@ -102,19 +114,25 @@ class Simpleaction extends Component {
                   <ListGroupItem style={{ width: "250px", overflow: "scroll" }}>
                     {makeReadable(sa.name)}
                   </ListGroupItem>
-                  <Form>
-                    {this.simpleactionNoArguments(sa) ?
-                      <Form.Control as="input" disabled style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
-                        value={sa.args}
-                        onChange={this.props.handleSimpleactionArgsChange(sa)}>
-                      </Form.Control>
-                      :
-                      <Form.Control as="input" required style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
-                        value={sa.args}
-                        onChange={this.props.handleSimpleactionArgsChange(sa)}>
-                      </Form.Control>
-                    }
-                  </Form>
+
+                  <OverlayTrigger
+                    placement="right"
+                    delay={{ show: 250, hide: 400 }}
+                    overlay={renderTooltip(this.getSimpleactionInfo(sa))}>
+                    <Form>
+                      {this.simpleactionNoArguments(sa) ?
+                        <Form.Control as="input" disabled style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
+                          value={sa.args}
+                          onChange={this.props.handleSimpleactionArgsChange(sa)}>
+                        </Form.Control>
+                        :
+                        <Form.Control as="input" required style={{ marginLeft: "5px", width: "120px", overflow: "scroll" }}
+                          value={sa.args}
+                          onChange={this.props.handleSimpleactionArgsChange(sa)}>
+                        </Form.Control>
+                      }
+                    </Form>
+                  </OverlayTrigger>
 
                   <Button style={{ marginLeft: "5px" }} onClick={this.props.handleRemoveSimpleaction(sa)} variant="outline-danger">
                     X
@@ -127,6 +145,14 @@ class Simpleaction extends Component {
   }
 }
 
+function renderTooltip(info, props) {
+  console.log(info)
+  return (
+    <Tooltip id="button-tooltip" {...props}>
+      {info}
+    </Tooltip>
+  );
+}
 
 function makeReadable(saName) {
   saName = saName.replace(/_/g, " ")

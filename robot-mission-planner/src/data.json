@@ -4,29 +4,29 @@
             "language" : "python",
             "port" : "5001",
             "simpleactions": [
-                {"name":"set_altitude", "numArgs": 1, "type":"move"},
-                {"name":"go_forward", "numArgs": 1, "type":"move"},
-                {"name":"go_backward", "numArgs": 1, "type":"move"},
-                {"name":"turn_right", "numArgs": 1, "type":"move"},
-                {"name":"turn_left", "numArgs": 1, "type":"move"},
-                {"name":"recognise_objects", "numArgs": 0, "type":"set_property"},
-                {"name":"go_to_location", "numArgs": 1, "type":"move"},
-                {"name":"set_message_target", "numArgs": 1, "type":"set_property"},
-                {"name":"send_location", "numArgs":0, "type":"notify"},
-                {"name":"stop_movement", "numArgs": 0, "type":"move"}
+                {"name":"set_altitude", "numArgs": 1, "type":"move", "information":"Set altitude of drone in meters"},
+                {"name":"go_forward", "numArgs": 1, "type":"move", "information":"Move robot forward for x amount of seconds"},
+                {"name":"go_backward", "numArgs": 1, "type":"move", "information":"Move robot backward for x amount of seconds"},
+                {"name":"turn_right", "numArgs": 1, "type":"move", "information":"Turn robot right for x amout of seconds"},
+                {"name":"turn_left", "numArgs": 1, "type":"move", "information":"Turn robot left for x amount of seconds"},
+                {"name":"recognise_objects", "numArgs": 0, "type":"set_property", "information":"Turn on object recognition (requires camera)"},
+                {"name":"go_to_location", "numArgs": 1, "type":"move", "information":"Choose a location [x, y] for the robot to go to"},
+                {"name":"set_message_target", "numArgs": 1, "type":"set_property", "information":"Set target of messages from this robot"},
+                {"name":"send_location", "numArgs":0, "type":"notify", "information":"Send the location of this robot to the set target"},
+                {"name":"stop_movement", "numArgs": 0, "type":"move", "information":"Stop all movement"}
             ]
         },
         "moose": {
             "language" : "python",
             "port" : "5002",
             "simpleactions": [
-                {"name":"go_forward", "numArgs": 1, "type":"move"},
-                {"name":"go_backward", "numArgs": 1, "type":"move"},
-                {"name":"turn_right", "numArgs": 1, "type":"move"},
-                {"name":"turn_left", "numArgs": 1, "type":"move"},
-                {"name":"go_to_location", "numArgs": 1, "type":"move"},
-                {"name":"stop_movement", "numArgs": 0, "type":"move"},
-                {"name":"receive_location_from_robot", "numArgs":0 , "type":"wait"}
+                {"name":"go_forward", "numArgs": 1, "type":"move", "information":"Move robot forward for x amount of seconds"},
+                {"name":"go_backward", "numArgs": 1, "type":"move", "information":"Move robot backward for x amount of seconds"},
+                {"name":"turn_right", "numArgs": 1, "type":"move", "information":"Turn robot right for x amout of seconds"},
+                {"name":"turn_left", "numArgs": 1, "type":"move", "information":"Turn robot left for x amount of seconds"},
+                {"name":"go_to_location", "numArgs": 1, "type":"move", "information":"Choose a location [x, y] for the robot to go to, if empty go to stored location"},
+                {"name":"stop_movement", "numArgs": 0, "type":"move", "information":"Stop all movement"},
+                {"name":"receive_location_from_robot", "numArgs":0 , "type":"wait", "information":"Wait for location from another robot"}
             ]
         }
     },
