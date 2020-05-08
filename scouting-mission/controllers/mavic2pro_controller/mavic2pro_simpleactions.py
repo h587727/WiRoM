@@ -58,6 +58,7 @@ navigate = False
 target_reached = False
 message_recipient = ''
 location = []
+target_loc = []
 simpleactions = []
 
 # Initialize which sets the target altitude as well as start the main loop
@@ -116,9 +117,9 @@ def recognise_objects():
 
 
 def go_to_location(target):
-    global location
+    global target_loc
     global navigate
-    location = target
+    target_loc = target
     navigate = True
     while navigate:
         time.sleep(1)
@@ -151,12 +152,12 @@ def sync_send_location():
 # Function that finds the angle and distance to a location and moves the vehicle accordingly
 def navigate_to_location():
     global navigate
-    global location
+    global target_loc
 
     pos = gps.getValues()
     north = compass.getValues()
     front = [-north[0], north[1], north[2]]
-    dir = [location[0] - pos[0], location[1] - pos[2]]
+    dir = [target_loc[0] - pos[0], target_loc[1] - pos[2]]
     distance = math.sqrt(dir[0] * dir[0] + dir[1] * dir[1])
 
     # calculate the angle of which the vehicle is supposed to go to reach target
@@ -236,11 +237,14 @@ def mavic2pro_main():
     global recognise
     global navigate
     global rec_obj_pos
+    global location
 
     for motor in motors:
         motor.setPosition(float('inf'))
 
     while robot.step(timestep) != -1:
+        location = [gps.getValues()[0],gps.getValues()[2]]
+
         if navigate:
             navigate_to_location()
 
