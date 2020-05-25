@@ -47,7 +47,11 @@
                         {"name":"go_to_location", "args":"[377, -374]", "id":5},
                         {"name":"send_location", "args":"", "id":6},
                         {"name":"go_to_location", "args":"[347, -374]", "id":7},
-                        {"name":"send_location", "args":"", "id":8}
+                        {"name":"send_location", "args":"", "id":8},
+                        {"name":"go_to_location", "args":"[330, -393]", "id":9},
+                        {"name":"send_location", "args":"", "id":10},
+                        {"name":"go_to_location", "args":"[330, -419]", "id":11},
+                        {"name":"send_location", "args":"", "id":12}
                     ]
                 },
                 {
@@ -60,7 +64,11 @@
                         {"name":"receive_location_from_robot", "args":"", "id":2}, 
                         {"name":"go_to_location", "args":"[]", "id":3},
                         {"name":"receive_location_from_robot", "args":"", "id":4}, 
-                        {"name":"go_to_location", "args":"[]", "id":5}
+                        {"name":"go_to_location", "args":"[]", "id":5},
+                        {"name":"receive_location_from_robot", "args":"", "id":6}, 
+                        {"name":"go_to_location", "args":"[]", "id":7},
+                        {"name":"receive_location_from_robot", "args":"", "id":8}, 
+                        {"name":"go_to_location", "args":"[]", "id":9}
                     ]
                 }
             ]
