@@ -7,8 +7,8 @@ WorldInfo {
   }
 }
 Viewpoint {
-  orientation -0.0011468764568116916 0.999859450684186 0.016726133800447653 2.626823100457968
-  position 415.4646579742027 2.531706321942215 -414.95732249625553
+  orientation -0.017002453511161607 0.9984003306239363 0.05392305985953838 2.4163416151817314
+  position 419.80104494397347 3.459913161618698 -412.3336265249237
   follow "moose"
 }
 TexturedBackground {
@@ -34,12 +34,23 @@ SimpleTwoFloorsHouse {
 SimpleTwoFloorsHouse {
   translation 346.82 -0.68 -363.59
   name "simple two-storey house(2)"
+  enableBoundingObject FALSE
+}
+SimpleTwoFloorsHouse {
+  translation 317.3 -0.68 -395.09
+  rotation 0 1 0 1.5708
+  name "simple two-storey house(3)"
+}
+SimpleTwoFloorsHouse {
+  translation 317.54 -0.68 -422.74
+  rotation 0 1 0 1.5708
+  name "simple two-storey house(4)"
 }
 SolidBox {
-  translation 407.28 -0.54 -401.17
+  translation 407.852 -0.54 -401.327
   rotation 0 1 0 0.261799
   name "box(2)"
-  size 3 0.8 2
+  size 2 0.8 2
   appearance PBRAppearance {
     baseColorMap ImageTexture {
       url [
@@ -86,8 +97,26 @@ AdvertisingBoard {
   poleThickness 0.2
 }
 AdvertisingBoard {
-  translation 376.909 -0.71 -374.23
+  translation 377 -0.71 -374.23
   rotation 0 -1 0 -1.5708053071795867
+  name "advertising board(2)"
+  frontTexture [
+    "textures/carpet.jpg"
+  ]
+  backTexture [
+    "textures/carpet.jpg"
+  ]
+  displayWidth 1
+  displayHeight 1
+  frameThickness 0.3
+  frameColor 0.886269 0.886275 0.886275
+  poleNumber 1
+  poleHeight 3
+  poleThickness 0.2
+}
+AdvertisingBoard {
+  translation 330 -0.709994 -421.25
+  rotation 2.30815e-07 1 1.29029e-07 -3.141575307179586
   name "advertising board(1)"
   frontTexture [
     "textures/carpet.jpg"
@@ -122,7 +151,7 @@ Mavic2Pro {
       width 400
       height 240
       recognition Recognition {
-        maxRange 30
+        maxRange 5
       }
     }
   ]

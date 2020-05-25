@@ -52,7 +52,7 @@ pitch_disturbance = 0
 yaw_disturbance = 0
 
 # variables to set drone functions
-rec_obj_pos = []
+rec_obj_arr = []
 recognise = False
 navigate = False
 target_reached = False
@@ -60,6 +60,7 @@ message_recipient = ''
 location = []
 target_loc = []
 simpleactions = []
+amount_of_objects = 0
 
 # Initialize which sets the target altitude as well as start the main loop
 def init(port):
@@ -138,15 +139,22 @@ def stop_movement():
 
 
 def send_location():
-    global recognise
-    global navigate
-    send = threading.Thread(target=sync_send_location)
-    send.start()
+    global amount_of_objects
+    if not recognise:
+        send = threading.Thread(target=sync_send_location)
+        send.start()
+    elif len(rec_obj_arr) > amount_of_objects:
+        amount_of_objects = len(rec_obj_arr)
+        send = threading.Thread(target=sync_send_location)
+        send.start()
+    else:
+        print("No recognised object at location")
+    
 
 
 def sync_send_location():
     global location
-    location_json = {"location": [location[0], location[1] - 5]}
+    location_json = {"location": [location[0], location[1] - 2]}
     requests.post("http://localhost:5002/location", json=location_json)
 
 # Function that finds the angle and distance to a location and moves the vehicle accordingly
@@ -236,7 +244,7 @@ def setLocationConfig():
 def mavic2pro_main():
     global recognise
     global navigate
-    global rec_obj_pos
+    global rec_obj_arr
     global location
 
     for motor in motors:
@@ -251,11 +259,11 @@ def mavic2pro_main():
         stabilize_and_control_movement()
         if recognise and camera.getRecognitionObjects():
             for rec_obj in camera.getRecognitionObjects():
-                rec_obj_pos = [gps.getValues()[0] - rec_obj.get_position()[0], gps.getValues()[
-                    1] - rec_obj.get_position()[1], gps.getValues()[2] - rec_obj.get_position()[2]]
-                recognise = False
-                navigate = False
-                stop_movement()
+                if rec_obj.id not in rec_obj_arr:
+                    print(rec_obj.id)
+                    rec_obj_arr.append(rec_obj.id)
+                    navigate = False
+                    stop_movement()
 
 
 @app.route('/simpleactions', methods=['POST'])

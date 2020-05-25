@@ -91,7 +91,7 @@ def go_to_location(target):
     global location
     global navigate
     if not location and target:
-        location = target
+        location = [target]
 
     navigate = True
     while navigate:
