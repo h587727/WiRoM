@@ -1,6 +1,8 @@
 # Multi-robot-mission-planner
 This project is a part of a master thesis. The purpose of this project is to create a system for planning missions for heterogeneous multi-robot setups, letting the user create missions directly from the browser and execute them in a simulated environment. 
 
+[Link to quarantine delivery mission](http://www.youtube.com/watch?v=TE_qN2Zqp8E)
+
 Instructions for testing the system and a questionnaire that can be answered after testing the system is provided at the bottom of this readme file. This data will be used to evaluate the system for the master thesis.
 
 ## Pre-requirements
