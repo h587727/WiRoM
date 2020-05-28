@@ -1,4 +1,4 @@
-# Multi-robot-mission-planner
+# WiRoM: heterogeneous multi-robot mission planning
 This project is a part of a master thesis. The purpose of this project is to create a system for planning missions for heterogeneous multi-robot setups, letting the user create missions directly from the browser and execute them in a simulated environment. 
 
 [Link to quarantine delivery mission](http://www.youtube.com/watch?v=TE_qN2Zqp8E)
