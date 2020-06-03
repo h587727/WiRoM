@@ -34,7 +34,7 @@ This means we need to run the server and the client in order to run the system.
 First you start by running the web-client.
 Open a new terminal and navigate into the repository folder, then the robot-mission-planner folder, then the src folder: 
 ```
-cd Multi-robot-mission-planner/robot-mission-planner/src
+cd WiRoM/web_interface
 ```
 First run the following command to install all packages:
 ```
@@ -50,7 +50,7 @@ The client is now running at localhost:3000 (a new window should open automatica
 After the client is started, you can start the server.
 Open another new terminal window and navigate into the repository folder, then the scouting missions folder, then the controllers folder:
 ```
-cd Multi-robot-mission-planner/scouting-mission/controllers
+cd WiRoM/backend
 ```
 First run the following command to install all packages (listed in requirements.txt): 
 ```
