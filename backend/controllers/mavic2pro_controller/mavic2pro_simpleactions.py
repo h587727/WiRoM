@@ -173,7 +173,7 @@ def navigate_to_location():
     if angle < 0:
         angle += 2 * math.pi
 
-    # vehicle is on the right path when angle ≈ math.pi
+    # vehicle is on the right path when angle = math.pi
     if angle < math.pi - 0.01:
         turn_left(0)
     elif angle > math.pi + 0.01:
@@ -183,7 +183,6 @@ def navigate_to_location():
 
     # stop navigation and vehicle movements when target has been reached
     if distance < 1:
-        print('Reached target')
         navigate = False
         stop_movement()
 
@@ -260,7 +259,6 @@ def mavic2pro_main():
         if recognise and camera.getRecognitionObjects():
             for rec_obj in camera.getRecognitionObjects():
                 if rec_obj.id not in rec_obj_arr:
-                    print(rec_obj.id)
                     rec_obj_arr.append(rec_obj.id)
                     navigate = False
                     stop_movement()

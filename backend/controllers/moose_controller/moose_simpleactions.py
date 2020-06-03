@@ -122,7 +122,7 @@ def navigate_to_location():
     if angle < 0:
         angle += 2 * math.pi
 
-    # vehicle is on the right path when angle ≈ math.pi
+    # vehicle is on the right path when angle = math.pi
     if angle < math.pi - 0.01:
         turn_left(0)
     elif angle > math.pi + 0.01:
