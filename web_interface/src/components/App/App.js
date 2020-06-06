@@ -56,7 +56,7 @@ const CustomMenu = React.forwardRef(
   },
 );
 
-//App class which holds the main state of the system
+//App class holds the parent state of the system, child-components this state and update it via the functions in this class
 class App extends Component {
   state = {
     robots: data.robots,
@@ -93,7 +93,7 @@ class App extends Component {
             newSimpleactions = newMission[robot].simpleactions
             simpleaction.id = newSimpleactions.length
           }
-          
+
           else {
             newMission[robot] = { port: robots[robot]["port"], language: robots[robot]["language"] }
             simpleaction.id = 0
@@ -114,8 +114,8 @@ class App extends Component {
 
     for (let robot in this.state.robots) {
       this.state.robots[robot].simpleactions.forEach(sa => {
-          sa.robot = robot
-          availableSimpleactions.push(sa)
+        sa.robot = robot
+        availableSimpleactions.push(sa)
       })
     }
     this.setState({ availableSimpleactions: availableSimpleactions })
@@ -174,7 +174,7 @@ class App extends Component {
 
   handleAddNewTask = taskName => event => {
     let mission = this.state.missions[this.state.selectedMission]
-    mission.tasks.push({ "name": taskName, "id": mission.tasks.length, simpleactions: [], robot: "--"})
+    mission.tasks.push({ "name": taskName, "id": mission.tasks.length, simpleactions: [], robot: "--" })
     this.setState({ selectedTask: taskName })
     this.setState({ mission: mission })
 
@@ -187,7 +187,7 @@ class App extends Component {
     let tasks = this.state.missions[this.state.selectedMission].tasks
     tasks.forEach(task => {
       if (task.name === this.state.selectedTask)
-        task.simpleactions.push({ "name": sa.name, "args": ""})
+        task.simpleactions.push({ "name": sa.name, "args": "" })
       tasks[tasks.indexOf(task)] = task
     })
     this.setState({ tasks: tasks })
@@ -255,15 +255,15 @@ class App extends Component {
     this.setState({ missions: missions })
   }
 
-  //Submit the mission and send it to the backend
+  //Submit the mission, validate its arguments and send it to the backend
   handleSubmitMission = event => {
-    if(validateMission(this.state)) {
+    if (validateMission(this.state)) {
       sendMission(this.state);
       event.preventDefault();
     }
     else
       alert('Mission is not valid')
-  } 
+  }
 
   //Send the mission to the backend to perform automatic task allocation
   //The new task allocation is returned in the response of the request and updated here
@@ -273,17 +273,19 @@ class App extends Component {
       .then(res => {
         if (res === undefined)
           throw 'Could not connect to server'
-        
+
         let missions = this.state.missions
         missions[this.state.selectedMission].tasks = res
         console.log(res)
-        this.setState({missions: missions})
-        this.handleMissionChange();})
+        this.setState({ missions: missions })
+        this.handleMissionChange();
+      })
       .catch(console.log)
-    
+
     event.preventDefault();
   }
 
+  //render function for the app, upper layer which ties together all components
   render() {
     return (
       <Container fluid>
@@ -379,15 +381,16 @@ class App extends Component {
   }
 }
 
+//function to validate if simpleactions contain arguments
 function validateMission(state) {
   let mission = state.currentMission
   let robots = state.robots
   let isValid = true
 
-  for (let robot in mission){
+  for (let robot in mission) {
     mission[robot].simpleactions.forEach(simpleaction => {
       robots[robot].simpleactions.forEach(sa => {
-        if (sa.name === simpleaction.name){
+        if (sa.name === simpleaction.name) {
           if (sa.numArgs !== 0 && simpleaction.args.length === 0)
             isValid = false
         }
@@ -396,7 +399,6 @@ function validateMission(state) {
   }
   return isValid
 }
-
 
 function sendTaskAllocation(state) {
   console.log('Sending request')
@@ -408,14 +410,14 @@ function sendTaskAllocation(state) {
     },
     body: JSON.stringify(state.missions[state.selectedMission].tasks)
   })
-    .then(res => {return res.json()})
+    .then(res => { return res.json() })
     .catch(console.log)
   return res
 }
 
 function sendMission(state) {
   console.log('Sending request')
-  fetch('http://localhost:5000/controller', {
+  fetch('http://localhost:5000/mission', {
     method: 'POST',
     headers: {
       'Accept': 'application/json',

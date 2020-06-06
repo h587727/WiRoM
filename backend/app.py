@@ -13,8 +13,8 @@ with open('config.json') as json_data_file:
     robots = data["robots"]
 
 
-@app.route('/controller', methods=['POST'])
-def make_controller():
+@app.route('/mission', methods=['POST'])
+def receive_mission():
     mission = request.get_json()
     for robot in mission:
         sequence = []
@@ -29,9 +29,6 @@ def make_controller():
                     sequence.append(
                         simpleaction['name'] + "(" + simpleaction['args'] + ")")
 
-        print(mission[robot]['port'])
-        print(mission[robot]['language'])
-        print(sequence)
         success = False
         retries = 0
         while not success or retries is 60:
@@ -48,62 +45,56 @@ def make_controller():
 
 
 @app.route('/allocate', methods=['POST'])
-def task_allocation():
+def receive_tasks_for_allocation():
     tasks = request.get_json()
-
-    bids = bid_if_can_execute_tasks(robots, tasks)
-    bids = bid_by_utility(robots, tasks, bids)
-    print(bids)
-    tasks = allocate_tasks_to_highest_bidder(tasks, bids)
-
+    tasks = task_allocation(tasks, robots)
     return jsonify(tasks)
 
-# robot bids 1 if it can execute each simpleaction for a task, otherwise 0
-
-
-def bid_if_can_execute_tasks(robots, tasks):
+# automatic task allocation algorithm, auction-based solution
+# allocates tasks to robots based on highest bid
+def task_allocation(tasks, robots):
     bids = {}
     for task in tasks:
         bids[task["name"]] = {}
         for robot in robots:
-            can_execute = True
+            bids[task["name"]][robot] = {}
+            bid = 1
             for simpleaction in task["simpleactions"]:
-                if not any(robotSimpleaction["name"] == simpleaction["name"] for robotSimpleaction in robots[robot]["simpleactions"]):
-                    can_execute = False
+                robot_simpleaction = list(filter(
+                    lambda robot_simpleaction: robot_simpleaction["name"] == simpleaction["name"], robots[robot]["simpleactions"]))
+                if robot_simpleaction != []:
+                    robot_simpleaction[0].update({"args": simpleaction["args"]})
+                    robot_simpleaction[0].update({"location": robots[robot]["location"]})
 
-            if can_execute:
-                bids[task["name"]][robot] = 1
-            else:
-                bids[task["name"]][robot] = 0
+                    utility = calculate_utility(robot_simpleaction[0])
+                    bid = bid*utility
+                else:
+                    bid = 0
+            bids[task["name"]][robot] = bid
 
-    return bids
+    tasks = allocate_tasks_to_highest_bidder(tasks, bids)
+    return tasks
 
+# Calculate the utility a robot has for a simpleaction (quality - cost)
+def calculate_utility(robot_simpleaction):
+    utility = robot_simpleaction["quality"] - robot_simpleaction["cost"]
+    # calculate cross dependencies: go to location only such simpleaction for now
+    if robot_simpleaction["name"] == "go_to_location" and robot_simpleaction["args"] != "[]":
+        robot_loc = robot_simpleaction["location"]
+        targetlist = robot_simpleaction["args"].strip('][').split(', ')
+        target = {"x": int(targetlist[0]), "y": int(targetlist[1])}
+        distance = abs(robot_loc["x"] - target["x"] +
+                       robot_loc["y"] - target["y"])
+        # find distance from target location and normalize before adding to utility
+        distNorm = (1 - distance/100)
+        if distNorm > 0.1:
+            utility = utility * distNorm
+        else:
+            utility = utility * 0.1
 
-def bid_by_utility(robots, tasks, bids):
-    for task in tasks:
-        for robot in robots:
-            bid = bids[task["name"]][robot]
-            for simpleaction in task["simpleactions"]:
-                for robotSimpleaction in robots[robot]["simpleactions"]:
-                    if robotSimpleaction["name"] == simpleaction["name"]:
-                        utility = robotSimpleaction["quality"] - robotSimpleaction["cost"]
-                        bid = bid * utility
-                        if robotSimpleaction["name"] == "go_to_location" and simpleaction["args"] != "[]":
-                            loc = robots[robot]["location"]
-                            # change this when structure of args is changed
-                            target = {"x": 388, "y": -365}
-                            distance = abs(loc["x"] - target["x"] + loc["y"] - target["y"])
+    return utility
 
-                            distNorm = (1 - distance/100)
-                            if distNorm > 0.1:
-                                bid = bid * distNorm
-                            else:
-                                bid = bid * 0.1
-                        bids[task["name"]][robot] = bid
-    print(bids)
-    return bids
-
-
+# Sorting bids and allocates tasks to robots based on highest bid
 def allocate_tasks_to_highest_bidder(tasks, bids):
     for bid in bids:
         highest_bidder = '--'

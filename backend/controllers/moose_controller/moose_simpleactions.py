@@ -24,6 +24,7 @@ right_motors = [robot.getMotor(name) for name in right_motor_names]
 left_speed = 0
 right_speed = 0
 
+# get and enable nodes used by the robot
 gps = robot.getGPS('gps')
 compass = robot.getCompass('compass')
 gps.enable(timestep)
@@ -34,7 +35,7 @@ navigate = False
 location = []
 simpleactions = []
 
-
+# Initialize which sets the target altitude as well as start the main loop
 def init(port):
     main = threading.Thread(target=moose_main)
     execute = threading.Thread(target=execute_simpleactions)
@@ -104,7 +105,7 @@ def stop_movement():
     left_speed = 0
     right_speed = 0
 
-
+# Function that finds the angle and distance to a location and moves the vehicle accordingly
 def navigate_to_location():
     global navigate
     global location
@@ -137,7 +138,7 @@ def navigate_to_location():
         location.pop(0)
         stop_movement()
 
-
+#Actively wait for new location
 def receive_location_from_robot():
     while not location:
         time.sleep(1)
@@ -167,14 +168,7 @@ def moose_main():
         for motor in right_motors:
             motor.setVelocity(right_speed)
 
-
-@app.route('/simpleactions', methods=['POST'])
-def receive_simpleactions():
-    global simpleactions
-    simpleactions = request.get_json()
-    return "Updated simple actions", 200
-
-
+# Function for receiving messages from other robots
 @app.route('/location', methods=['POST'])
 def receive_location():
     global location
@@ -183,10 +177,19 @@ def receive_location():
     return "Received location", 200
 
 
+# Function for receiving simpleactions from server
+@app.route('/simpleactions', methods=['POST'])
+def receive_simpleactions():
+    global simpleactions
+    simpleactions = request.get_json()
+    return "Updated simple actions", 200
+
+
+# Function for executing simpleactions in the queue
 def execute_simpleactions():
     global simpleactions
     while robot.step(timestep) != -1:
         if simpleactions:
-            action = simpleactions.pop(0)
-            print(action)
-            eval(action)
+            simpleaction = simpleactions.pop(0)
+            print('Executing simpleaction: ' + simpleaction)
+            eval(simpleaction)

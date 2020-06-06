@@ -127,6 +127,7 @@ def go_to_location(target):
 
 
 def set_message_target(target):
+    print(target)
     global message_recipient
     message_recipient = target
 
@@ -149,7 +150,6 @@ def send_location():
         send.start()
     else:
         print("No recognised object at location")
-    
 
 
 def sync_send_location():
@@ -195,6 +195,7 @@ def CLAMP(value, low, high):
     return value
 
 
+# Function that calculates the values for each motor, keeping the drone stable
 def stabilize_and_control_movement():
     roll = iu.getRollPitchYaw()[0] + math.pi / 2.0
     pitch = iu.getRollPitchYaw()[1]
@@ -250,7 +251,7 @@ def mavic2pro_main():
         motor.setPosition(float('inf'))
 
     while robot.step(timestep) != -1:
-        location = [gps.getValues()[0],gps.getValues()[2]]
+        location = [gps.getValues()[0], gps.getValues()[2]]
 
         if navigate:
             navigate_to_location()
@@ -264,17 +265,18 @@ def mavic2pro_main():
                     stop_movement()
 
 
+# Function for receiving simpleactions from server
 @app.route('/simpleactions', methods=['POST'])
 def receive_simpleactions():
     global simpleactions
     simpleactions = request.get_json()
     return "Updated simple actions", 200
 
-
+# Function for executing simpleactions in the queue
 def execute_simpleactions():
     global simpleactions
     while robot.step(timestep) != -1:
         if simpleactions:
-            action = simpleactions.pop(0)
-            print(action)
-            eval(action)
+            simpleaction = simpleactions.pop(0)
+            print('Executing simpleaction: ' + simpleaction)
+            eval(simpleaction)
