@@ -91,8 +91,8 @@ When you have completed all the steps, the system is ready to be used.
 
 ### System instructions and questionnaire
 Follow these links to the instructions for testing the system, and then when you are done with this, go to the questionnaire and answer the questions.
+[Link to web interface quick instructions](https://youtu.be/Va9vNV0tj0c)
 
-[Instructions for testing the system](https://github.com/joakimgrutle/Multi-robot-mission-planner/blob/master/Mission%20planning%20instructions.pdf)
-[Link to web interface instructions](https://youtu.be/Va9vNV0tj0c)
+[Written instructions for testing the system](https://github.com/joakimgrutle/Multi-robot-mission-planner/blob/master/Mission%20planning%20instructions.pdf)
 
 [Questionnaire for after testing the system](https://docs.google.com/forms/d/e/1FAIpQLSciykaeCi5p2Nm09FnBMVxAytmdXgIIT2nBaX4pZkyQ40FsxA/viewform?usp=sf_link)
