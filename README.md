@@ -1,6 +1,8 @@
 # WiRoM: heterogeneous multi-robot mission planning
 This project is a part of a master thesis. The purpose of this project is to create a system for planning missions for heterogeneous multi-robot setups, letting the user create missions directly from the browser and execute them in a simulated environment. 
 
+[Link to web interface instructions](https://youtu.be/Va9vNV0tj0c)
+
 [Link to quarantine delivery mission](http://www.youtube.com/watch?v=TE_qN2Zqp8E)
 
 Instructions for testing the system and a questionnaire that can be answered after testing the system is provided at the bottom of this readme file. This data will be used to evaluate the system for the master thesis.
@@ -91,5 +93,6 @@ When you have completed all the steps, the system is ready to be used.
 Follow these links to the instructions for testing the system, and then when you are done with this, go to the questionnaire and answer the questions.
 
 [Instructions for testing the system](https://github.com/joakimgrutle/Multi-robot-mission-planner/blob/master/Mission%20planning%20instructions.pdf)
+[Link to web interface instructions](https://youtu.be/Va9vNV0tj0c)
 
 [Questionnaire for after testing the system](https://docs.google.com/forms/d/e/1FAIpQLSciykaeCi5p2Nm09FnBMVxAytmdXgIIT2nBaX4pZkyQ40FsxA/viewform?usp=sf_link)
