@@ -138,8 +138,89 @@
           "cost": 0
         }
       ]
+    },
+    "mavic2pro2": {
+      "language": "python",
+      "location": {
+        "x": 408.1075898997235,
+        "y": -400.673
+      },
+      "port": "5003",
+      "simpleactions": [
+        {
+          "name": "set_altitude",
+          "numArgs": 1,
+          "type": "move",
+          "quality": 1,
+          "cost": 0.01
+        },
+        {
+          "name": "go_forward",
+          "numArgs": 1,
+          "type": "move",
+          "quality": 0.975,
+          "cost": 0.1
+        },
+        {
+          "name": "go_backward",
+          "numArgs": 1,
+          "type": "move",
+          "quality": 0.975,
+          "cost": 0.1
+        },
+        {
+          "name": "turn_right",
+          "numArgs": 1,
+          "type": "move",
+          "quality": 0.975,
+          "cost": 0.1
+        },
+        {
+          "name": "turn_left",
+          "numArgs": 1,
+          "type": "move",
+          "quality": 0.975,
+          "cost": 0.1
+        },
+        {
+          "name": "recognise_objects",
+          "numArgs": 0,
+          "type": "set_property",
+          "quality": 1,
+          "cost": 0
+        },
+        {
+          "name": "go_to_location",
+          "numArgs": 1,
+          "type": "move",
+          "quality": 0.975,
+          "cost": 0.5
+        },
+        {
+          "name": "set_message_target",
+          "numArgs": 1,
+          "type": "set_property",
+          "quality": 1,
+          "cost": 0
+        },
+        {
+          "name": "send_location",
+          "numArgs": 0,
+          "type": "notify",
+          "quality": 1,
+          "cost": 0
+        },
+        {
+          "name": "stop_movement",
+          "numArgs": 0,
+          "type": "move",
+          "quality": 1,
+          "cost": 0
+        }
+      ]
     }
   },
+  
   "world": {
     "file": "scouting-mission.wbt"
   }
